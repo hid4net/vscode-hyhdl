@@ -1,0 +1,82 @@
+{
+    "name": "hyhdl",
+    "displayName": "HDL coding assistant",
+    "description": "FPGA工程师写bug的辅助工具",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.66.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Linters"
+    ],
+    "activationEvents": [
+        "onLanguage:verilog",
+        "onCommand:hyhdl.helloWorld"
+    ],
+    "main": "./src/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "hyhdl.helloWorld",
+                "title": "hyhdl.hello",
+                "icon": "$(book)"
+            }
+        ],
+        "languages": [
+            {
+                "id": "verilog",
+                "aliases": [
+                    "Verilog",
+                    "verilog"
+                ],
+                "extensions": [
+                    ".v",
+                    ".V",
+                    ".vh",
+                    ".vl",
+                    ".veo"
+                ],
+                "configuration": "./config/verilog.configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "verilog",
+                "scopeName": "source.verilog",
+                "path": "./syntaxes/verilog.tmLanguage.json"
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "hyhdl.helloWorld",
+                    "when": "editorLangId == verilog"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "hyhdl.helloWorld",
+                    "when": "editorLangId == verilog",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "node ./test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.66.0",
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.0",
+        "@types/node": "14.x",
+        "eslint": "^8.11.0",
+        "glob": "^7.2.0",
+        "mocha": "^9.2.2",
+        "typescript": "^4.5.5",
+        "@vscode/test-electron": "^2.1.3"
+    }
+}

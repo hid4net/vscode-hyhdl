@@ -1,0 +1,625 @@
+{
+    "name": "Verilog",
+    "scopeName": "source.verilog",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "match": "^\\s*(`define)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.other.directive.verilog"
+                },
+                "2": {
+                    "name": "constant.other.verilog"
+                }
+            },
+            "name": "meta.directive.define.verilog"
+        },
+        {
+            "match": "^\\s*(`(ifdef|ifndef|undef))\\s+(`?[a-zA-Z_\\\\][\\w\\$]*)\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.other.directive.verilog"
+                },
+                "3": {
+                    "name": "support.variable.verilog"
+                }
+            },
+            "name": "markup.italic.verilog"
+        },
+        {
+            "match": "^\\s*(`(else|endif))\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.other.directive.verilog"
+                }
+            },
+            "name": "markup.italic.verilog"
+        },
+        {
+            "match": "^\\s*(`timescale)\\s+(\\w+)\\s*([fpnum]?s)\\s*/\\s*(\\w+)\\s*([fpnum]?s)\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.other.directive.verilog"
+                },
+                "2": {
+                    "patterns": [
+                        {
+                            "include": "#operators"
+                        },
+                        {
+                            "include": "#constants"
+                        }
+                    ]
+                },
+                "3": {
+                    "name": "support.constant.verilog"
+                },
+                "4": {
+                    "patterns": [
+                        {
+                            "include": "#operators"
+                        },
+                        {
+                            "include": "#constants"
+                        }
+                    ]
+                },
+                "5": {
+                    "name": "support.constant.verilog"
+                }
+            },
+            "name": "meta.directive.timescale.verilog"
+        },
+        {
+            "match": "\\b(module|macromodule|primitive|config)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                "2": {
+                    "name": "entity.name.type.verilog"
+                }
+            },
+            "name": "meta.module.declaration.verilog"
+        },
+        {
+            "include": "#parameters"
+        },
+        {
+            "include": "#ports"
+        },
+        {
+            "include": "#variables"
+        },
+        {
+            "match": "\\b(task)\\s+(automatic)?\\s*([a-zA-Z_\\\\][\\w\\$]*)\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                "2": {
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                "3": {
+                    "name": "entity.name.function.verilog"
+                }
+            },
+            "name": "meta.task.declaration.verilog"
+        },
+        {
+            "match": "\\b(function)\\s+((automatic)\\s+)?((signed)\\s+)?(\\[.+?:.+?\\]\\s*)?([a-zA-Z_\\\\][\\w\\$]*)\\b",
+            "captures": {
+                "1": {
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                "3": {
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                "5": {
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                "6": {
+                    "patterns": [
+                        {
+                            "include": "#operators"
+                        },
+                        {
+                            "include": "#constants"
+                        }
+                    ]
+                },
+                "7": {
+                    "name": "entity.name.function.verilog"
+                }
+            },
+            "name": "meta.function.declaration.verilog"
+        },
+        {
+            "match": "(?<=\\b(begin|fork)\\s*:\\s*)([a-zA-Z_\\\\][\\w\\$]*)\\b",
+            "name": "entity.name.section.verilog"
+        },
+        {
+            "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\s*\\(",
+            "captures": {
+                "1": {
+                    "name": "entity.name.type.verilog"
+                },
+                "2": {
+                    "name": "variable.other.module.verilog"
+                }
+            },
+            "name": "meta.module.inst_noparam.verilog"
+        },
+        {
+            "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*#\\s*\\(",
+            "captures": {
+                "1": {
+                    "name": "entity.name.type.verilog"
+                }
+            },
+            "name": "meta.module.inst_param.verilog"
+        },
+        {
+            "match": "\\)\\s*([a-zA-Z_\\\\][\\w\\$]*)\\s*\\(",
+            "name": "variable.other.module.verilog"
+        },
+        {
+            "include": "#attribute"
+        },
+        {
+            "include": "#constants"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#dataTypes"
+        },
+        {
+            "include": "#sysTasks_Functions"
+        }
+    ],
+    "repository": {
+        "basicElements": {
+            "patterns": [
+                {
+                    "include": "#comments"
+                },
+                {
+                    "include": "#constants"
+                },
+                {
+                    "include": "#strings"
+                },
+                {
+                    "include": "#keywords"
+                },
+                {
+                    "include": "#operators"
+                },
+                {
+                    "include": "#dataTypes"
+                },
+                {
+                    "include": "#sysTasks_Functions"
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "match": "//.*(?=$)",
+                    "name": "comment.line.double-slash.verilog"
+                },
+                {
+                    "begin": "/\\*",
+                    "end": "\\*/",
+                    "name": "comment.block.verilog"
+                }
+            ]
+        },
+        "paramId": {
+            "patterns": [
+                {
+                    "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*(=.+?)(,|;|$)",
+                    "captures": {
+                        "1": {
+                            "name": "constant.other.verilog"
+                        },
+                        "2": {
+                            "patterns": [
+                                {
+                                    "include": "#constants"
+                                },
+                                {
+                                    "include": "#strings"
+                                },
+                                {
+                                    "include": "#operators"
+                                },
+                                {
+                                    "include": "#sysTasks_Functions"
+                                }
+                            ]
+                        }
+                    },
+                    "name": "mete.parameter.id.verilog"
+                }
+            ]
+        },
+        "parameters": {
+            "patterns": [
+                {
+                    "match": "\\b(localparam|parameter)\\b(.+?(;|,(?=/[/\\*])|\\s(?=/[/\\*])|\\n))",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.other.param.verilog"
+                        },
+                        "2": {
+                            "patterns": [
+                                {
+                                    "include": "#dataTypes"
+                                },
+                                {
+                                    "include": "#constants"
+                                },
+                                {
+                                    "include": "#operators"
+                                },
+                                {
+                                    "include": "#sysTasks_Functions"
+                                },
+                                {
+                                    "include": "#paramId"
+                                }
+                            ]
+                        }
+                    },
+                    "name": "meta.parameter.verilog"
+                }
+            ]
+        },
+        "portId": {
+            "patterns": [
+                {
+                    "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*(=.+?)?(,|;|$)",
+                    "captures": {
+                        "1": {
+                            "name": "variable.other.verilog"
+                        },
+                        "2": {
+                            "patterns": [
+                                {
+                                    "include": "#constants"
+                                },
+                                {
+                                    "include": "#strings"
+                                },
+                                {
+                                    "include": "#operators"
+                                },
+                                {
+                                    "include": "#sysTasks_Functions"
+                                }
+                            ]
+                        }
+                    },
+                    "name": "mete.variable.id.verilog"
+                }
+            ]
+        },
+        "ports": {
+            "patterns": [
+                {
+                    "match": "\\b(input|output|inout)\\b(.+?(;|,(?=/[/\\*])|\\s(?=/[/\\*])|\\n))",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.ctrl.base.verilog"
+                        },
+                        "2": {
+                            "patterns": [
+                                {
+                                    "include": "#dataTypes"
+                                },
+                                {
+                                    "include": "#constants"
+                                },
+                                {
+                                    "include": "#operators"
+                                },
+                                {
+                                    "include": "#sysTasks_Functions"
+                                },
+                                {
+                                    "include": "#portId"
+                                }
+                            ]
+                        }
+                    },
+                    "name": "meta.ports.verilog"
+                }
+            ]
+        },
+        "variableId": {
+            "patterns": [
+                {
+                    "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*(=.+?)?(,|;)",
+                    "captures": {
+                        "1": {
+                            "name": "variable.other.verilog"
+                        },
+                        "2": {
+                            "patterns": [
+                                {
+                                    "include": "#constants"
+                                },
+                                {
+                                    "include": "#strings"
+                                },
+                                {
+                                    "include": "#operators"
+                                },
+                                {
+                                    "include": "#sysTasks_Functions"
+                                }
+                            ]
+                        }
+                    },
+                    "name": "mete.variable.id.verilog"
+                }
+            ]
+        },
+        "variables": {
+            "patterns": [
+                {
+                    "match": "\\b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?;)",
+                    "captures": {
+                        "1": {
+                            "name": "storage.type.verilog"
+                        },
+                        "2": {
+                            "patterns": [
+                                {
+                                    "include": "#dataTypes"
+                                },
+                                {
+                                    "include": "#constants"
+                                },
+                                {
+                                    "include": "#operators"
+                                },
+                                {
+                                    "include": "#sysTasks_Functions"
+                                },
+                                {
+                                    "include": "#variableId"
+                                }
+                            ]
+                        }
+                    },
+                    "name": "meta.variable.verilog"
+                },
+                {
+                    "match": "^\\s*(event|genvar)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\b",
+                    "captures": {
+                        "1": {
+                            "name": "storage.type.verilog"
+                        },
+                        "2": {
+                            "name": "variable.other.verilog"
+                        }
+                    },
+                    "name": "meta.variable.var.verilog"
+                }
+            ]
+        },
+        "attribute": {
+            "patterns": [
+                {
+                    "begin": "\\(\\*(?=\\s*\\w)",
+                    "end": "\\*\\)",
+                    "patterns": [
+                        {
+                            "include": "#operators"
+                        },
+                        {
+                            "include": "#strings"
+                        },
+                        {
+                            "include": "#constants"
+                        }
+                    ],
+                    "contentName": "markup.italic"
+                }
+            ]
+        },
+        "constants": {
+            "patterns": [
+                {
+                    "match": "\\b\\d(\\d|_\\d)*(\\.\\d(\\d|_\\d)*)?([eE][\\+\\-]?\\d(\\d|_\\d)*)?(?!'|\\w)",
+                    "name": "constant.numeric.decimal.verilog"
+                },
+                {
+                    "match": "\\b(\\d*)?'[sS]?(([bB][0-1xXzZ\\?]([0-1xXzZ\\?]|_[0-1xXzZ\\?])*)|([oO][0-7xXzZ\\?]([0-7xXzZ\\?]|_[0-7xXzZ\\?])*)|([dD][0-9xXzZ\\?]([0-9xXzZ\\?]|_[0-9xXzZ\\?])*)|([hH][0-9a-fA-FxXzZ\\?]([0-9a-fA-FxXzZ\\?]|_[0-9a-fA-FxXzZ\\?])*))(?!'|\\w)",
+                    "name": "constant.numeric.based_integer.verilog"
+                },
+                {
+                    "match": "\\b[01xXzZ]+\\b",
+                    "name": "constant.numeric.logic.verilog"
+                },
+                {
+                    "match": "`(?!(cell)?define|default_(nettype|decay_time|trireg_strength)|delay_mode_(distributed|path|unit|zero)|else|elsif|end(celldefine|if)|if(n?def)?|include|line|(no)?unconnected_drive|resetall|timescale|undef)[a-zA-Z_\\\\][\\w\\$]*\\b",
+                    "name": "constant.other.verilog"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "begin": "\"",
+                    "end": "\"",
+                    "name": "string.quoted.double.verilog",
+                    "patterns": [
+                        {
+                            "match": "\\\\.",
+                            "name": "constant.character.escape.verilog"
+                        },
+                        {
+                            "match": "(%)(\\d*)?[bBoOdDhHcC]",
+                            "name": "constant.other.placeholder.integer.verilog"
+                        },
+                        {
+                            "match": "(%)(\\d*(\\.\\d+)?)?[eEfFgG]",
+                            "name": "constant.other.placeholder.float.verilog"
+                        },
+                        {
+                            "match": "(%)[lLvVmMsStTuUzZ%]",
+                            "name": "constant.other.placeholder.other.verilog"
+                        },
+                        {
+                            "match": "(%)",
+                            "name": "invalid.illegal.placeholder.verilog"
+                        }
+                    ]
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "match": "(?<=^\\s*)`((cell)?define|default_(nettype|decay_time|trireg_strength)|delay_mode_(distributed|path|unit|zero)|else|elsif|end(celldefine|if)|if(n?def)?|include|line|(no)?unconnected_drive|resetall|timescale|undef)\\b",
+                    "name": "keyword.other.directive.verilog"
+                },
+                {
+                    "match": "\\b(always|(de)?assign|automatic|begin|case[xz]?|cell|config|default|defparam|design|disable|edge|else|end(case|config|function|generate|module|primitive|specify|table|task)?|for(ce|ever|k)?|function|generate|if(none)?|incdir|include|initial|inout|input|instance|join|liblist|library|(macro)?module|negedge|(no)?showcancelled|output|posedge|primitive|pulsestyle_on(event|detect)|release|repeat|specify|specparam|table|task|use|wait|while)\\b",
+                    "name": "keyword.ctrl.base.verilog"
+                },
+                {
+                    "match": "(?<=^\\s*)\\b(n?and|n?or|xn?or|buf(if[01])?|not(if[01])?|pull(up|down)|r?[cpn]mos|(r)?tran(if[01])?)\\b",
+                    "name": "keyword.other.gate.verilog"
+                },
+                {
+                    "match": "\\b(localparam|parameter)\\b",
+                    "name": "keyword.other.param.verilog"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "match": "\\+|\\-|\\*{1,2}|\\/|%",
+                    "name": "keyword.operator.arithmetic.verilog"
+                },
+                {
+                    "match": "(<|>)=?|(!|=)?==?",
+                    "name": "keyword.operator.comparison.verilog"
+                },
+                {
+                    "match": "(!|&&|\\|\\||\\bor\\b)",
+                    "name": "keyword.operator.logical.verilog"
+                },
+                {
+                    "match": "(&|\\||~|\\^|<<<?|>>>?)",
+                    "name": "keyword.operator.bitwise.verilog"
+                },
+                {
+                    "match": "(\\?|:)",
+                    "name": "keyword.operator.conditional.verilog"
+                },
+                {
+                    "match": "(#|@)",
+                    "name": "keyword.operator.other.verilog"
+                }
+            ]
+        },
+        "dataTypes": {
+            "patterns": [
+                {
+                    "match": "\\b(wire|w(and|or)|tri(0|1|and|or|reg)?|reg|integer|real|(real)?time|event|genvar)\\b",
+                    "name": "storage.type.verilog"
+                },
+                {
+                    "match": "\\b((un)?signed|vectored|scalared)\\b",
+                    "name": "storage.modifier.normal.verilog"
+                },
+                {
+                    "match": "\\b(supply[01]|strong[01]|pull[01]|weak[01]|highz[01]|small|medium|large)\\b",
+                    "name": "storage.modifier.strength.verilog"
+                }
+            ]
+        },
+        "sysTasks_Functions": {
+            "patterns": [
+                {
+                    "match": "\\$(setup(hold)?|hold|recovery|removal|recrem|(time|full)?skew|period|width|nochange)\\b",
+                    "name": "support.function.system.timing.verilog"
+                },
+                {
+                    "match": "\\$((display|strobe|write)(b|o|h)?|monitor(b|o|h|on|off)?)\\b",
+                    "name": "support.function.system.display.verilog"
+                },
+                {
+                    "match": "\\$(f(open|close|(display|write|strobe|monitor)(b|o|h)?|get(c|s)|scanf|read|tell|seek|flush|error)|s(scanf|write(b|o|h)?|format)|readmem(b|h)|rewind|sdf_annotate|ungetc)\\b",
+                    "name": "support.function.system.file.verilog"
+                },
+                {
+                    "match": "\\$(printtimescale|timeformat)\\b",
+                    "name": "support.function.system.timescale.verilog"
+                },
+                {
+                    "match": "\\$(finish|stop|(real|s)?time)\\b",
+                    "name": "support.function.system.simulation.verilog"
+                },
+                {
+                    "match": "\\$(a)?sync\\$((n)?and|(n)?or)\\$(array|plane)\\b",
+                    "name": "support.function.system.pla.verilog"
+                },
+                {
+                    "match": "\\$(q_(initialize|add|remove|full|exam))\\b",
+                    "name": "support.function.system.stochastic.verilog"
+                },
+                {
+                    "match": "\\$(bitstoreal|realtobits|itor|rtoi|(un)?signed)\\b",
+                    "name": "support.function.system.conversion.verilog"
+                },
+                {
+                    "match": "\\$(random|dist_(chi_square|erlang|exponential|normal|poisson|t|uniform))\\b",
+                    "name": "support.function.system.random_number.verilog"
+                },
+                {
+                    "match": "\\$(test|value)\\$plusargs\\b",
+                    "name": "support.function.system.cli.verilog"
+                },
+                {
+                    "match": "\\$(dump(file|vars|off|on|all|limit|flush))\\b",
+                    "name": "support.function.vcd.dump.verilog"
+                },
+                {
+                    "match": "\\$(end(definitions)?|comment|date|timescale|(up)?scope|var|version)\\b",
+                    "name": "support.function.vcd.format.verilog"
+                },
+                {
+                    "match": "\\$(dumpports(off|on|all|limit|flush)|vcdclose)\\b",
+                    "name": "support.function.vcd.dumpports.verilog"
+                },
+                {
+                    "match": "\\$(end(definitions)?|comment|date|timescale|(up)?scope|var|version)\\b",
+                    "name": "support.function.vcd.format_extend.verilog"
+                },
+                {
+                    "match": "\\$(countdrivers|list|input|scope|showscopes|(no)?(key|log)|reset(_count|_value)?|(inc)?save|restart|showvars|getpattern|sreadmem(b|h)|scale)",
+                    "name": "support.function.non_standard.verilog"
+                }
+            ]
+        }
+    }
+}

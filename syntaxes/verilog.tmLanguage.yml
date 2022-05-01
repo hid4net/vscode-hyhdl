@@ -1,0 +1,498 @@
+---
+#------------------------------------------------------------------------------
+#  Verilog tmLanguage
+#
+#  依照 IEEE Std 1364-2001 标准
+#  tmLanguage 语法参考: https://macromates.com/manual/en/language_grammars
+#
+# todo  完善模块例化的适配性
+# todo  完善变量在使用时的适配
+# todo  完善自定义任务和函数在使用时的适配
+# todo
+#------------------------------------------------------------------------------
+name: Verilog
+scopeName: source.verilog
+
+#------------------------------------------------------------------------------
+#  patterns: 需要匹配的内容 (可引用 repository 中的内容)
+#     1. 注释中的内容不再匹配细节
+#     2. 编辑器会依照此文中规则的顺序进行匹配, 需要将最明确的规则放在最前
+#     3. 优先匹配 meta, 不在 meta 中的, 由基本元素匹配
+#------------------------------------------------------------------------------
+patterns:
+  #---------------------------------------
+  # 注释
+  #---------------------------------------
+  - include: "#comments"
+
+  #---------------------------------------
+  # meta
+  #---------------------------------------
+
+  #--------- 预编译 ----------
+  # `define: 匹配定义的变量
+  - match: ^\s*(`define)\s+([a-zA-Z_\\][\w\$]*)\b
+    captures:
+      1:
+        name: keyword.other.directive.verilog
+      2:
+        name: constant.other.verilog # 常量不高亮, 如果想要高亮, 换成其它 tmLanguage 类型
+    name: meta.directive.define.verilog
+  # `ifdef|ifndef|undef: 匹配定义的变量
+  - match: ^\s*(`(ifdef|ifndef|undef))\s+(`?[a-zA-Z_\\][\w\$]*)\b
+    captures:
+      1:
+        name: keyword.other.directive.verilog
+      3:
+        name: support.variable.verilog
+    name: markup.italic.verilog
+  # `else|endif: 匹配定义的变量
+  - match: ^\s*(`(else|endif))\b
+    captures:
+      1:
+        name: keyword.other.directive.verilog
+    name: markup.italic.verilog
+  # `timescale: 匹配时间刻度
+  - match: ^\s*(`timescale)\s+(\w+)\s*([fpnum]?s)\s*/\s*(\w+)\s*([fpnum]?s)\b
+    captures:
+      1:
+        name: keyword.other.directive.verilog
+      2:
+        patterns:
+          - include: "#operators"
+          - include: "#constants"
+      3:
+        name: support.constant.verilog
+      4:
+        patterns:
+          - include: "#operators"
+          - include: "#constants"
+      5:
+        name: support.constant.verilog
+    name: meta.directive.timescale.verilog
+
+  #--------- module|primitive|config: 匹配模块名 ----------
+  - match: \b(module|macromodule|primitive|config)\s+([a-zA-Z_\\][\w\$]*)\b
+    captures:
+      1:
+        name: keyword.ctrl.base.verilog
+      2:
+        name: entity.name.type.verilog
+    name: meta.module.declaration.verilog
+
+  #--------- 参数的声明 ----------
+  - include: "#parameters"
+  #--------- 参数的使用 ----------
+  # *   情况太复杂了, 暂不实现
+
+  #--------- 端口的声明 ----------
+  - include: "#ports"
+  #--------- 端口网络的使用 ----------
+  # *   情况太复杂了, 暂不实现
+
+  #--------- 变量的声明 ----------
+  - include: "#variables"
+  #--------- 变量的使用 ----------
+  # *   情况太复杂了, 暂不实现
+
+  #--------- 任务或函数的声明 ----------
+  - match: \b(task)\s+(automatic)?\s*([a-zA-Z_\\][\w\$]*)\b
+    captures:
+      1: # function
+        name: keyword.ctrl.base.verilog
+      2: # function
+        name: keyword.ctrl.base.verilog
+      3: # 任务名
+        name: entity.name.function.verilog
+    name: meta.task.declaration.verilog
+  - match: \b(function)\s+((automatic)\s+)?((signed)\s+)?(\[.+?:.+?\]\s*)?([a-zA-Z_\\][\w\$]*)\b
+    captures:
+      1: # function
+        name: keyword.ctrl.base.verilog
+      3: # function
+        name: keyword.ctrl.base.verilog
+      5: # signed
+        name: keyword.ctrl.base.verilog
+      6: # range
+        patterns:
+          - include: "#operators"
+          - include: "#constants"
+      7: # 函数名
+        name: entity.name.function.verilog
+    name: meta.function.declaration.verilog
+  #--------- 任务或函数的使用 ----------
+  # *   情况太复杂了, 暂不实现
+
+  #--------- begin|fork: 匹配其名称  ----------
+  - match: (?<=\b(begin|fork)\s*:\s*)([a-zA-Z_\\][\w\$]*)\b
+    name: entity.name.section.verilog
+
+  #--------- 模块例化 ----------
+  # ! 尽量放在靠后的位置, 防止匹配到其它类型
+  # 无参数模块例化
+  # !  目前仅支持 "<模块名> <例化名> (" 在同一行的形式
+  - match: \b([a-zA-Z_\\][\w\$]*)\s+([a-zA-Z_\\][\w\$]*)\s*\(
+    captures:
+      1:
+        name: entity.name.type.verilog
+      2:
+        name: variable.other.module.verilog
+    name: meta.module.inst_noparam.verilog
+  # 带参数的模块例化
+  # !  目前仅支持 "<模块名> # (" 以及 ") <例化名> (" 在同一行的形式
+  - match: \b([a-zA-Z_\\][\w\$]*)\s*#\s*\(
+    captures:
+      1:
+        name: entity.name.type.verilog
+    name: meta.module.inst_param.verilog
+  - match: \)\s*([a-zA-Z_\\][\w\$]*)\s*\(
+    name: variable.other.module.verilog
+
+  #--------- 属性 ----------
+  - include: "#attribute"
+
+  #---------------------------------------
+  # 基本元素
+  #---------------------------------------
+  # 常量: 数字, 参数值, `define 的值, 延时(暂未匹配)
+  - include: "#constants"
+  # 字符串
+  - include: "#strings"
+  # 关键词
+  - include: "#keywords"
+  # 操作符
+  - include: "#operators"
+  # 数据类型
+  - include: "#dataTypes"
+  # 系统任务
+  - include: "#sysTasks_Functions"
+#------------------------------------------------------------------------------
+#  repository: 匹配模式库
+#------------------------------------------------------------------------------
+repository:
+  basicElements:
+    patterns:
+      - include: "#comments"
+      - include: "#constants"
+      - include: "#strings"
+      - include: "#keywords"
+      - include: "#operators"
+      - include: "#dataTypes"
+      - include: "#sysTasks_Functions"
+
+  #---------------------------------------
+  # 注释
+  #---------------------------------------
+  comments:
+    patterns:
+      - match: //.*(?=$)
+        name: comment.line.double-slash.verilog
+      - begin: /\*
+        end: \*/
+        name: comment.block.verilog
+
+  #---------------------------------------
+  # meta
+  #---------------------------------------
+
+  #--------- 参数 ----------
+  paramId:
+    patterns:
+      - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)(,|;|$)
+        captures:
+          1:
+            name: constant.other.verilog
+          2:
+            patterns:
+              - include: "#constants"
+              - include: "#strings"
+              - include: "#operators"
+              - include: "#sysTasks_Functions"
+        name: mete.parameter.id.verilog
+  parameters:
+    patterns:
+      - match: \b(localparam|parameter)\b(.+?(;|,(?=/[/\*])|\s(?=/[/\*])|\n))
+        captures:
+          1:
+            name: keyword.other.param.verilog
+          2:
+            patterns:
+              - include: "#dataTypes"
+              - include: "#constants"
+              - include: "#operators"
+              - include: "#sysTasks_Functions"
+              - include: "#paramId"
+        name: meta.parameter.verilog
+
+  #--------- 端口 ----------
+  portId:
+    patterns:
+      - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)?(,|;|$)
+        captures:
+          1:
+            name: variable.other.verilog
+          2:
+            patterns:
+              - include: "#constants"
+              - include: "#strings"
+              - include: "#operators"
+              - include: "#sysTasks_Functions"
+        name: mete.variable.id.verilog
+  ports:
+    patterns:
+      - match: \b(input|output|inout)\b(.+?(;|,(?=/[/\*])|\s(?=/[/\*])|\n))
+        captures:
+          1:
+            name: keyword.ctrl.base.verilog
+          2:
+            patterns:
+              - include: "#dataTypes"
+              - include: "#constants"
+              - include: "#operators"
+              - include: "#sysTasks_Functions"
+              - include: "#portId"
+        name: meta.ports.verilog
+
+  #--------- 变量的声明 ----------
+  variableId:
+    patterns:
+      - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)?(,|;)
+        captures:
+          1:
+            name: variable.other.verilog
+          2:
+            patterns:
+              - include: "#constants"
+              - include: "#strings"
+              - include: "#operators"
+              - include: "#sysTasks_Functions"
+        name: mete.variable.id.verilog
+  variables:
+    patterns:
+      - match: \b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?;)
+        captures:
+          1:
+            name: storage.type.verilog
+          2:
+            patterns:
+              - include: "#dataTypes"
+              - include: "#constants"
+              - include: "#operators"
+              - include: "#sysTasks_Functions"
+              - include: "#variableId"
+        name: meta.variable.verilog
+      - match: ^\s*(event|genvar)\s+([a-zA-Z_\\][\w\$]*)\b
+        captures:
+          1:
+            name: storage.type.verilog
+          2:
+            name: variable.other.verilog
+        name: meta.variable.var.verilog
+
+  #--------- 属性 ----------
+  attribute:
+    patterns:
+      - begin: \(\*(?=\s*\w) # 排除 (*) 的匹配
+        end: \*\)
+        patterns:
+          - include: "#operators"
+          - include: "#strings"
+          - include: "#constants"
+        contentName: markup.italic
+
+  # #--------- 信号范围 ----------
+  # range:
+  #   patterns:
+  #     - match: (\[.+?:.+?\])
+  #       captures:
+  #         1:
+  #           patterns:
+  #             - include: "#constants"
+  #             - include: "#strings"
+  #             - include: "#operators"
+  #             - include: "#sysTasks_Functions"
+  #       name: mete.range.verilog
+
+  #---------------------------------------
+  # 基本元素
+  #---------------------------------------
+
+  #--------- 常量 ----------
+  constants:
+    patterns:
+      # 普通十进制数字
+      - match: \b\d(\d|_\d)*(\.\d(\d|_\d)*)?([eE][\+\-]?\d(\d|_\d)*)?(?!'|\w)
+        name: constant.numeric.decimal.verilog
+      # 基数表示的数字
+      - match: "\\b(\\d*)?'[sS]?(\
+          ([bB][0-1xXzZ\\?]([0-1xXzZ\\?]|_[0-1xXzZ\\?])*)|\
+          ([oO][0-7xXzZ\\?]([0-7xXzZ\\?]|_[0-7xXzZ\\?])*)|\
+          ([dD][0-9xXzZ\\?]([0-9xXzZ\\?]|_[0-9xXzZ\\?])*)|\
+          ([hH][0-9a-fA-FxXzZ\\?]([0-9a-fA-FxXzZ\\?]|_[0-9a-fA-FxXzZ\\?])*)\
+          )(?!'|\\w)"
+        name: constant.numeric.based_integer.verilog
+      # 逻辑值
+      - match: \b[01xXzZ]+\b
+        name: constant.numeric.logic.verilog
+      # `define 定义的常量: 匹配模式: `(不是预编译指令)常量
+      - match:
+          "`(?!(cell)?define|default_(nettype|decay_time|trireg_strength)|delay_mode_(distributed|path|unit|zero)|else|elsif|end(celldefine|if)|if(n?def)?|include|line|(no)?unconnected_drive|resetall|timescale|undef)\
+          [a-zA-Z_\\\\][\\w\\$]*\\b"
+        name: constant.other.verilog
+      # 时延
+      #   时延值: typ, (min:typ:max)
+      #   时延类型: 统一门延时, (上升沿延时:下降沿延时)
+
+  #--------- 字符串 ----------
+  strings:
+    patterns:
+      - begin: '"'
+        end: '"'
+        name: string.quoted.double.verilog
+        patterns:
+          # 转义符
+          - match: \\.
+            name: constant.character.escape.verilog
+          # 占位符: 整数
+          - match: (%)(\d*)?[bBoOdDhHcC]
+            name: constant.other.placeholder.integer.verilog
+          # 占位符: 浮点数
+          - match: (%)(\d*(\.\d+)?)?[eEfFgG]
+            name: constant.other.placeholder.float.verilog
+          # 其它占位符
+          - match: (%)[lLvVmMsStTuUzZ%]
+            name: constant.other.placeholder.other.verilog
+          # 非法占位符
+          - match: (%)
+            name: invalid.illegal.placeholder.verilog
+
+  #--------- 关键词 ----------
+  keywords:
+    patterns:
+      # 预编译指令
+      - match: "(?<=^\\s*)`(\
+          (cell)?define|default_(nettype|decay_time|trireg_strength)|delay_mode_(distributed|path|unit|zero)|else|elsif|end(celldefine|if)|\
+          if(n?def)?|include|line|(no)?unconnected_drive|resetall|timescale|undef\
+          )\\b"
+        name: keyword.other.directive.verilog
+      # 所有关键词: 不包括: 数据类型, 门和开关模型
+      - match: "\\b(\
+          always|(de)?assign|automatic|begin|case[xz]?|cell|config|default|defparam|design|disable|\
+          edge|else|end(case|config|function|generate|module|primitive|specify|table|task)?|for(ce|ever|k)?|function|generate|\
+          if(none)?|incdir|include|initial|inout|input|instance|join|liblist|library|(macro)?module|negedge|(no)?showcancelled|\
+          output|posedge|primitive|pulsestyle_on(event|detect)|release|repeat|specify|specparam|table|task|use|wait|while\
+          )\\b"
+        name: keyword.ctrl.base.verilog
+      # 关键词: 门和开关模型
+      - match: (?<=^\s*)\b(n?and|n?or|xn?or|buf(if[01])?|not(if[01])?|pull(up|down)|r?[cpn]mos|(r)?tran(if[01])?)\b
+        name: keyword.other.gate.verilog
+      # 关键词: 其它
+      - match: \b(localparam|parameter)\b
+        name: keyword.other.param.verilog
+      #
+      # # 所有关键词
+      # - match: "\\b(\
+      #           always|and|(de)?assign|automatic|begin|buf(if[01])?|case[xz]?|cell|cmos|config|default|defparam|design|disable|\
+      #           edge|else|end(case|config|function|generate|module|primitive|specify|table|task)?|for(ce|ever|k)?|function|generate|genvar|\
+      #           highz[01]|if(none)?|incdir|include|initial|inout|input|instance|integer|join|large|liblist|library|localparam|\
+      #           (macro)?module|medium|n(and|or)|negedge|nmos|nor|(no)?showcancelled|not(if[01])?|\
+      #           or|output|parameter|pmos|posedge|primitive|pull(0|1|up|down)|pulsestyle_on(event|detect)|\
+      #           r[cpn]mos|real(time)?|reg|release|repeat|(r)?tran(if[01])?|scalared|(un)?signed|small|specify|specparam|strong[01]|supply[01]|\
+      #           table|task|time|tri(0|1|and|or|reg)?|\
+      #           use|vectored|wait|w(and|or)|weak[01]|while|wire|x(n)?or
+      #           )\\b"
+      #   name: keyword.ctrl.all.verilog
+
+  #--------- 操作符 ----------
+  operators:
+    patterns:
+      # - match: \+|-|\*|/|%|(<|>)=?|(!|=)?==?|!|&&?|\|\|?|\^?~|~\^?|\^
+      #   name: keyword.operator.verilog
+      # arithmetic
+      - match: \+|\-|\*{1,2}|\/|%
+        name: keyword.operator.arithmetic.verilog
+      # comparison
+      - match: (<|>)=?|(!|=)?==?
+        name: keyword.operator.comparison.verilog
+      # logical
+      - match: (!|&&|\|\||\bor\b)
+        name: keyword.operator.logical.verilog
+      # bitwise
+      - match: (&|\||~|\^|<<<?|>>>?)
+        name: keyword.operator.bitwise.verilog
+      # conditional
+      - match: (\?|:)
+        name: keyword.operator.conditional.verilog
+      # other: #, @
+      - match: (#|@)
+        name: keyword.operator.other.verilog
+
+  #--------- 数据类型 ----------
+  dataTypes:
+    patterns:
+      # 线网, 寄存器, 时间, genvar
+      # - match: \b(wire|w(and|or)|tri(0|1|and|or|reg)?|supply[01]|reg|integer|real|(real)?time|genvar)\b
+      - match: \b(wire|w(and|or)|tri(0|1|and|or|reg)?|reg|integer|real|(real)?time|event|genvar)\b
+        name: storage.type.verilog
+      # 修饰符
+      # - match: \b((un)?signed|vectored|scalared|supply[01]|strong[01]|pull[01]|weak[01]|highz[01]|small|medium|large)\b
+      #   name: storage.modifier.verilog
+      # 修饰符: 有符号, 无符号, 矢量, 标量
+      - match: \b((un)?signed|vectored|scalared)\b
+        name: storage.modifier.normal.verilog
+      # 修饰符: 强度
+      - match: \b(supply[01]|strong[01]|pull[01]|weak[01]|highz[01]|small|medium|large)\b
+        name: storage.modifier.strength.verilog
+
+  #--------- 系统任务或函数 ----------
+  sysTasks_Functions:
+    patterns:
+      # System timing checks [15]
+      - match: \$(setup(hold)?|hold|recovery|removal|recrem|(time|full)?skew|period|width|nochange)\b
+        name: support.function.system.timing.verilog
+      # Display tasks [17.1]
+      - match: \$((display|strobe|write)(b|o|h)?|monitor(b|o|h|on|off)?)\b
+        name: support.function.system.display.verilog
+      # File I/O tasks [17.2]
+      - match: "\\$(\
+          f(open|close|(display|write|strobe|monitor)(b|o|h)?|get(c|s)|scanf|read|tell|seek|flush|error)|\
+          s(scanf|write(b|o|h)?|format)|\
+          readmem(b|h)|rewind|sdf_annotate|ungetc\
+          )\\b"
+        name: support.function.system.file.verilog
+      # Timescale tasks [17.3]
+      - match: \$(printtimescale|timeformat)\b
+        name: support.function.system.timescale.verilog
+      # Simulation control tasks [17.4] + Simulation time functions [17.7]
+      - match: \$(finish|stop|(real|s)?time)\b
+        name: support.function.system.simulation.verilog
+      # PLA modeling tasks [17.5]
+      - match: \$(a)?sync\$((n)?and|(n)?or)\$(array|plane)\b
+        name: support.function.system.pla.verilog
+      # Stochastic analysis tasks [17.6]
+      - match: \$(q_(initialize|add|remove|full|exam))\b
+        name: support.function.system.stochastic.verilog
+      # Conversion functions [17.8]
+      - match: \$(bitstoreal|realtobits|itor|rtoi|(un)?signed)\b
+        name: support.function.system.conversion.verilog
+      # Probabilistic distribution functions [17.9]
+      - match: \$(random|dist_(chi_square|erlang|exponential|normal|poisson|t|uniform))\b
+        name: support.function.system.random_number.verilog
+      # Command line input [17.10]
+      - match: \$(test|value)\$plusargs\b
+        name: support.function.system.cli.verilog
+      # VCD: dumpfile [18.1]
+      - match: \$(dump(file|vars|off|on|all|limit|flush))\b
+        name: support.function.vcd.dump.verilog
+      # VCD: format [18.2]
+      - match: \$(end(definitions)?|comment|date|timescale|(up)?scope|var|version)\b
+        name: support.function.vcd.format.verilog
+      # VCD: dumpports [18.3]
+      - match: \$(dumpports(off|on|all|limit|flush)|vcdclose)\b
+        name: support.function.vcd.dumpports.verilog
+      # VCD: format_extend [18.4]
+      - match: \$(end(definitions)?|comment|date|timescale|(up)?scope|var|version)\b
+        name: support.function.vcd.format_extend.verilog
+      # non_standard [Annex C]
+      - match: \$(countdrivers|list|input|scope|showscopes|(no)?(key|log)|reset(_count|_value)?|(inc)?save|restart|showvars|getpattern|sreadmem(b|h)|scale)
+        name: support.function.non_standard.verilog
