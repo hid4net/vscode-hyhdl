@@ -1,5 +1,3 @@
 node_modules
 .vscode-test/
 *.vsix
-.hg/
-.hgignore
