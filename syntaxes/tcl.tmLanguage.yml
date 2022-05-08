@@ -1,0 +1,247 @@
+---
+#------------------------------------------------------------------------------
+#  tcl
+#
+#  tmLanguage 语法参考: https://macromates.com/manual/en/language_grammars
+#------------------------------------------------------------------------------
+name: tcl
+scopeName: source.tcl
+#------------------------------------------------------------------------------
+#  patterns: 需要匹配的内容 (可引用 repository 中的内容)
+#     1. 编辑器会依照此文中规则的顺序进行匹配, 需要将最明确的规则放在最前
+#     2. 优先匹配 meta, 不在 meta 中的, 由基本元素匹配
+#     3. 注释的情况比较特殊，不能优先匹配
+#------------------------------------------------------------------------------
+patterns:
+  #---------------------------------------
+  # meta
+  #---------------------------------------
+
+  #--------- 变量 ----------
+  #   命令替换
+  #
+
+  #--------- 变量 ----------
+  - include: "#variables"
+  #   变量替换
+
+  #---------------------------------------
+  # 基本元素
+  #---------------------------------------
+  # 注释
+  - include: "#comments"
+  # 常量: 数字, 参数值, `define 的值, 延时(暂未匹配)
+  # - include: "#constants"
+  # 字符串
+  - include: "#strings"
+  # 关键词
+  - include: "#keywords"
+  # 操作符
+  # - include: "#operators"
+  # 数据类型
+  # - include: "#dataTypes"
+
+#------------------------------------------------------------------------------
+#  repository: 匹配模式库
+#------------------------------------------------------------------------------
+repository:
+  # basicElements:
+  #   patterns:
+  #     - include: "#comments"
+  #     - include: "#constants"
+  #     - include: "#strings"
+  #     - include: "#keywords"
+  #     - include: "#operators"
+  #     - include: "#dataTypes"
+  #     - include: "#variables"
+
+  #---------------------------------------
+  # 注释
+  #---------------------------------------
+  comments:
+    patterns:
+      - match: (?<=^|;)\s*#.*$
+        name: comment.line.number-sign.tcl
+
+  #---------------------------------------
+  # meta
+  #---------------------------------------
+
+  #--------- 变量的声明 ----------
+  # variableId:
+  #   patterns:
+  #     - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)?(,|;)
+  #       captures:
+  #         1:
+  #           name: variable.other.verilog
+  #         2:
+  #           patterns:
+  #             - include: "#constants"
+  #             - include: "#strings"
+  #             - include: "#operators"
+  #             - include: "#sysTasks_Functions"
+  #       name: mete.variable.id.verilog
+  # variables:
+  #   patterns:
+  #     - match: \b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?;)
+  #       captures:
+  #         1:
+  #           name: storage.type.verilog
+  #         2:
+  #           patterns:
+  #             - include: "#dataTypes"
+  #             - include: "#constants"
+  #             - include: "#operators"
+  #             - include: "#sysTasks_Functions"
+  #             - include: "#variableId"
+  #       name: meta.variable.verilog
+  #     - match: ^\s*(event|genvar)\s+([a-zA-Z_\\][\w\$]*)\b
+  #       captures:
+  #         1:
+  #           name: storage.type.verilog
+  #         2:
+  #           name: variable.other.verilog
+  #       name: meta.variable.var.verilog
+
+  #---------------------------------------
+  # 基本元素
+  #---------------------------------------
+
+  #--------- 常量 ----------
+  # constants:
+  #   patterns:
+      # # 普通十进制数字
+      # - match: \b\d(\d|_\d)*(\.\d(\d|_\d)*)?([eE][\+\-]?\d(\d|_\d)*)?(?!'|\w)
+      #   name: constant.numeric.decimal.tcl
+      # # 基数表示的数字
+      # - match: "\\b(\\d*)?'[sS]?(\
+      #     ([bB][0-1xXzZ\\?]([0-1xXzZ\\?]|_[0-1xXzZ\\?])*)|\
+      #     ([oO][0-7xXzZ\\?]([0-7xXzZ\\?]|_[0-7xXzZ\\?])*)|\
+      #     ([dD][0-9xXzZ\\?]([0-9xXzZ\\?]|_[0-9xXzZ\\?])*)|\
+      #     ([hH][0-9a-fA-FxXzZ\\?]([0-9a-fA-FxXzZ\\?]|_[0-9a-fA-FxXzZ\\?])*)\
+      #     )(?!'|\\w)"
+      #   name: constant.numeric.based_integer.tcl
+      # # `define 定义的常量: 匹配模式: `(不是预编译指令)常量
+      # - match:
+      #     "`(?!(cell)?define|default_(nettype|decay_time|trireg_strength)|delay_mode_(distributed|path|unit|zero)|else|elsif|end(celldefine|if)|if(n?def)?|include|line|(no)?unconnected_drive|resetall|timescale|undef)\
+      #     [a-zA-Z_\\\\][\\w\\$]*\\b"
+      #   name: constant.other.tcl
+      # # 时延
+      # #   时延值: typ, (min:typ:max)
+      # #   时延类型: 统一门延时, (上升沿延时:下降沿延时)
+      #
+
+  #--------- 字符串 ----------
+  strings:
+    patterns:
+      - begin: '"'
+        end: '"'
+        name: string.quoted.double.tcl
+        patterns:
+          # 转义符
+          - match: \\.
+            name: constant.character.escape.tcl
+        #   # 占位符: 整数
+        #   - match: (%)(\d*)?[bBoOdDhHcC]
+        #     name: constant.other.placeholder.integer.tcl
+        #   # 占位符: 浮点数
+        #   - match: (%)(\d*(\.\d+)?)?[eEfFgG]
+        #     name: constant.other.placeholder.float.tcl
+        #   # 其它占位符
+        #   - match: (%)[lLvVmMsStTuUzZ%]
+        #     name: constant.other.placeholder.other.tcl
+        #   # 非法占位符
+        #   - match: (%)
+        #     name: invalid.illegal.placeholder.tcl
+
+  #--------- 关键词 ----------
+  keywords:
+    patterns:
+      # 所有关键词
+      - match: "\\b(\
+                after|append|apply|argc|argv(0)?|array|auto_(execok|import|load|mkindex|path|qualify|reset)|\
+                bgerror|binary|break|\
+                catch|cd|chan|clock|close|concat|continue|coroutine|\
+                dde|dict|\
+                encoding|env|eof|error(Code|Info)?|eval|exec|exit|expr|\
+                f(blocked|configure|copy)|file(event|name)?|flush|for(each|mat)?\
+                gets|glob(al)?|\
+                history|http|\
+                if|incr|info|interp|\
+                join|\
+                lappend|lassign|lindex|linsert|list|llength|lmap|load|lrange|lrepeat|lreplace|lreverse|lsearch|lset|lsort|\
+                math(func|op)|memory|msgcat|my|\
+                namespace|next(to)?|\
+                oo::(class|copy|(obj)?define|object)|open|\
+                package|parray|pid|pkg::create|pkg_mkIndex|platform(::shell)?|proc|puts|pwd|\
+                re_syntax|read|refchan|regexp|registry|regsub|rename|return|\
+                safe|scan|seek|self|set|socket|source|split|string|subst|switch|\
+                tailcall|Tcl|tcl::prefix|\
+                tcl_(endOfWord|findLibrary|interactive|library|nonwordchars|patchLevel|pkgPath|platform|precision|rcFileName|startOfNextWord|startOfPreviousWord|traceCompile|traceExec|version|wordBreakAfter|wordBreakBefore|wordchars)|\
+                tcltest|tell|throw|time(rate)?|tm|trace|transchan|try|\
+                unknown|unload|unset|update|uplevel|upvar|\
+                variable|vwait|\
+                while|\
+                yield(to)?|\
+                zlib\
+                )\\b"
+        name: keyword.ctrl.all.tcl
+
+
+  #--------- 操作符 ----------
+  # operators:
+  #   patterns:
+      # # - match: \+|-|\*|/|%|(<|>)=?|(!|=)?==?|!|&&?|\|\|?|\^?~|~\^?|\^
+      # #   name: keyword.operator.tcl
+      # # arithmetic
+      # - match: \+|\-|\*{1,2}|\/|%
+      #   name: keyword.operator.arithmetic.tcl
+      # # comparison
+      # - match: (<|>)=?|(!|=)?==?
+      #   name: keyword.operator.comparison.tcl
+      # # logical
+      # - match: (!|&&|\|\||\bor\b)
+      #   name: keyword.operator.logical.tcl
+      # # bitwise
+      # - match: (&|\||~|\^|<<<?|>>>?)
+      #   name: keyword.operator.bitwise.tcl
+      # # conditional
+      # - match: (\?|:)
+      #   name: keyword.operator.conditional.tcl
+      # # other: #, @
+      # - match: (#|@)
+      #   name: keyword.operator.other.tcl
+
+  #--------- 数据类型 ----------
+  # dataTypes:
+  #   patterns:
+      # # 线网, 寄存器, 时间, genvar
+      # # - match: \b(wire|w(and|or)|tri(0|1|and|or|reg)?|supply[01]|reg|integer|real|(real)?time|genvar)\b
+      # - match: \b(wire|w(and|or)|tri(0|1|and|or|reg)?|reg|integer|real|(real)?time|event|genvar)\b
+      #   name: storage.type.tcl
+      # # 修饰符
+      # # - match: \b((un)?signed|vectored|scalared|supply[01]|strong[01]|pull[01]|weak[01]|highz[01]|small|medium|large)\b
+      # #   name: storage.modifier.tcl
+      # # 修饰符: 有符号, 无符号, 矢量, 标量
+      # - match: \b((un)?signed|vectored|scalared)\b
+      #   name: storage.modifier.normal.tcl
+      # # 修饰符: 强度
+      # - match: \b(supply[01]|strong[01]|pull[01]|weak[01]|highz[01]|small|medium|large)\b
+      #   name: storage.modifier.strength.tcl
+
+  #--------- 变量 ----------
+  variables:
+    patterns:
+      # - begin: (\$(?:(?:\:\:)?[a-zA-Z0-9_]+)+)\(
+      #   beginCaptures:
+      #     "1":
+      #       name: variable.other.tcl
+      #   end: \)
+      #   patterns:
+      #     - include: "#brackets"
+      #     - include: "#variable"
+      # - match: \$(?:(?:\:\:)?[a-zA-Z0-9_]+)+
+      #   name: variable.other.tcl
+      - begin: \$\{
+        end: \}
+        name: variable.other.tcl

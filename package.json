@@ -27,6 +27,7 @@
             {
                 "id": "verilog",
                 "aliases": [
+                    "VerilogHDL",
                     "Verilog",
                     "verilog"
                 ],
@@ -38,6 +39,18 @@
                     ".veo"
                 ],
                 "configuration": "./config/verilog.configuration.json"
+            },
+            {
+                "id": "tcl",
+                "aliases": [
+                    "Tcl",
+                    "tcl"
+                ],
+                "extensions": [
+                    ".tcl",
+                    ".tm"
+                ],
+                "configuration": "./config/tcl.configuration.json"
             }
         ],
         "grammars": [
@@ -45,6 +58,11 @@
                 "language": "verilog",
                 "scopeName": "source.verilog",
                 "path": "./syntaxes/verilog.tmLanguage.json"
+            },
+            {
+                "language": "tcl",
+                "scopeName": "source.tcl",
+                "path": "./syntaxes/tcl.tmLanguage.json"
             }
         ],
         "menus": {

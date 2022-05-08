@@ -1,0 +1,60 @@
+{
+  "name": "tcl",
+  "scopeName": "source.tcl",
+  "patterns": [
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#keywords"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "match": "(?<=^|;)\\s*#.*$",
+          "name": "comment.line.number-sign.tcl"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.tcl",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.tcl"
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "\\b(after|append|apply|argc|argv(0)?|array|auto_(execok|import|load|mkindex|path|qualify|reset)|bgerror|binary|break|catch|cd|chan|clock|close|concat|continue|coroutine|dde|dict|encoding|env|eof|error(Code|Info)?|eval|exec|exit|expr|f(blocked|configure|copy)|file(event|name)?|flush|for(each|mat)?gets|glob(al)?|history|http|if|incr|info|interp|join|lappend|lassign|lindex|linsert|list|llength|lmap|load|lrange|lrepeat|lreplace|lreverse|lsearch|lset|lsort|math(func|op)|memory|msgcat|my|namespace|next(to)?|oo::(class|copy|(obj)?define|object)|open|package|parray|pid|pkg::create|pkg_mkIndex|platform(::shell)?|proc|puts|pwd|re_syntax|read|refchan|regexp|registry|regsub|rename|return|safe|scan|seek|self|set|socket|source|split|string|subst|switch|tailcall|Tcl|tcl::prefix|tcl_(endOfWord|findLibrary|interactive|library|nonwordchars|patchLevel|pkgPath|platform|precision|rcFileName|startOfNextWord|startOfPreviousWord|traceCompile|traceExec|version|wordBreakAfter|wordBreakBefore|wordchars)|tcltest|tell|throw|time(rate)?|tm|trace|transchan|try|unknown|unload|unset|update|uplevel|upvar|variable|vwait|while|yield(to)?|zlib)\\b",
+          "name": "keyword.ctrl.all.tcl"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "begin": "\\$\\{",
+          "end": "\\}",
+          "name": "variable.other.tcl"
+        }
+      ]
+    }
+  }
+}
