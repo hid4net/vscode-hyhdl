@@ -142,7 +142,7 @@
             "name": "entity.name.section.verilog"
         },
         {
-            "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\s*\\(",
+            "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\s*\\(\\s*(?=$|//)",
             "captures": {
                 "1": {
                     "name": "entity.name.type.verilog"
@@ -154,7 +154,7 @@
             "name": "meta.module.inst_noparam.verilog"
         },
         {
-            "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*#\\s*\\(",
+            "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*#\\s*\\(\\s*(?=$|//)",
             "captures": {
                 "1": {
                     "name": "entity.name.type.verilog"
@@ -259,7 +259,7 @@
         "parameters": {
             "patterns": [
                 {
-                    "match": "\\b(localparam|parameter)\\b(.+?(;|,(?=/[/\\*])|\\s(?=/[/\\*])|\\n))",
+                    "match": "\\b(localparam|parameter)\\b(.+?)(;|\\n|(?=(,|\\s)(/[/\\*])))",
                     "captures": {
                         "1": {
                             "name": "keyword.other.param.verilog"
@@ -320,7 +320,7 @@
         "ports": {
             "patterns": [
                 {
-                    "match": "\\b(input|output|inout)\\b(.+?(;|,(?=/[/\\*])|\\s(?=/[/\\*])|\\n))",
+                    "match": "\\b(input|output|inout)\\b(.+?)(;|\\n|(?=(,|\\s)(/[/\\*])))",
                     "captures": {
                         "1": {
                             "name": "keyword.ctrl.base.verilog"
@@ -352,7 +352,7 @@
         "variableId": {
             "patterns": [
                 {
-                    "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*(=.+?)?(,|;)",
+                    "match": "\\b([a-zA-Z_\\\\][\\w\\$]*)\\s*((=.*?)|(\\[.+\\]\\s*))?(,|;|$)",
                     "captures": {
                         "1": {
                             "name": "variable.other.verilog"
@@ -381,7 +381,7 @@
         "variables": {
             "patterns": [
                 {
-                    "match": "\\b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?;)",
+                    "match": "\\b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?)(;|\\n|(?=(,|\\s)(/[/\\*])))",
                     "captures": {
                         "1": {
                             "name": "storage.type.verilog"
@@ -409,7 +409,7 @@
                     "name": "meta.variable.verilog"
                 },
                 {
-                    "match": "^\\s*(event|genvar)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\b",
+                    "match": "^\\s*(event|genvar)\\s+([a-zA-Z_\\\\][\\w\\$]*)\\s*;",
                     "captures": {
                         "1": {
                             "name": "storage.type.verilog"
@@ -428,6 +428,10 @@
                     "begin": "\\(\\*(?=\\s*\\w)",
                     "end": "\\*\\)",
                     "patterns": [
+                        {
+                            "match": "\\b([a-zA-Z]\\w*)\\s*(?==)",
+                            "name": "support.other.attribute.verilog"
+                        },
                         {
                             "include": "#operators"
                         },

@@ -130,8 +130,8 @@ patterns:
   #--------- 模块例化 ----------
   # ! 尽量放在靠后的位置, 防止匹配到其它类型
   # 无参数模块例化
-  # !  目前仅支持 "<模块名> <例化名> (" 在同一行的形式
-  - match: \b([a-zA-Z_\\][\w\$]*)\s+([a-zA-Z_\\][\w\$]*)\s*\(
+  # !  目前仅支持 "<模块名> <例化名> (" 在同一行, 且 ( 后是末尾或注释的形式
+  - match: \b([a-zA-Z_\\][\w\$]*)\s+([a-zA-Z_\\][\w\$]*)\s*\(\s*(?=$|//)
     captures:
       1:
         name: entity.name.type.verilog
@@ -140,7 +140,7 @@ patterns:
     name: meta.module.inst_noparam.verilog
   # 带参数的模块例化
   # !  目前仅支持 "<模块名> # (" 以及 ") <例化名> (" 在同一行的形式
-  - match: \b([a-zA-Z_\\][\w\$]*)\s*#\s*\(
+  - match: \b([a-zA-Z_\\][\w\$]*)\s*#\s*\(\s*(?=$|//)
     captures:
       1:
         name: entity.name.type.verilog
@@ -196,7 +196,7 @@ repository:
   #---------------------------------------
 
   #--------- 参数 ----------
-  paramId:
+  paramId:  # 为了匹配参数的标识符
     patterns:
       - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)(,|;|$)
         captures:
@@ -209,9 +209,10 @@ repository:
               - include: "#operators"
               - include: "#sysTasks_Functions"
         name: mete.parameter.id.verilog
-  parameters:
+  parameters: # 匹配参数
     patterns:
-      - match: \b(localparam|parameter)\b(.+?(;|,(?=/[/\*])|\s(?=/[/\*])|\n))
+      - match: \b(localparam|parameter)\b(.+?)(;|\n|(?=(,|\s)(/[/\*])))
+      # - match: \b(localparam|parameter)\b(.+?(;|,(?=/[/\*])|\s(?=/[/\*])|\n))
         captures:
           1:
             name: keyword.other.param.verilog
@@ -225,7 +226,7 @@ repository:
         name: meta.parameter.verilog
 
   #--------- 端口 ----------
-  portId:
+  portId:   # 为了匹配端口的标识符
     patterns:
       - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)?(,|;|$)
         captures:
@@ -238,9 +239,10 @@ repository:
               - include: "#operators"
               - include: "#sysTasks_Functions"
         name: mete.variable.id.verilog
-  ports:
+  ports:  # 匹配端口
     patterns:
-      - match: \b(input|output|inout)\b(.+?(;|,(?=/[/\*])|\s(?=/[/\*])|\n))
+      - match: \b(input|output|inout)\b(.+?)(;|\n|(?=(,|\s)(/[/\*])))
+      # - match: \b(input|output|inout)\b(.+?(;|,(?=/[/\*])|\s(?=/[/\*])|\n))
         captures:
           1:
             name: keyword.ctrl.base.verilog
@@ -254,9 +256,9 @@ repository:
         name: meta.ports.verilog
 
   #--------- 变量的声明 ----------
-  variableId:
+  variableId:   # 为了匹配变量的标识符
     patterns:
-      - match: \b([a-zA-Z_\\][\w\$]*)\s*(=.+?)?(,|;)
+      - match: \b([a-zA-Z_\\][\w\$]*)\s*((=.*?)|(\[.+\]\s*))?(,|;|$)  # 考虑 [ 多个参数, 声明并赋值, 变量为数组 ] 的情况
         captures:
           1:
             name: variable.other.verilog
@@ -267,13 +269,14 @@ repository:
               - include: "#operators"
               - include: "#sysTasks_Functions"
         name: mete.variable.id.verilog
-  variables:
+  variables:  # 匹配变量
     patterns:
-      - match: \b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?;)
+      # 匹配线网和寄存器声明的变量
+      - match: \b(wire|wand|wor|tri0|tri1|triand|trior|trireg|reg|integer|real|realtime|time)(.+?)(;|\n|(?=(,|\s)(/[/\*])))
         captures:
           1:
             name: storage.type.verilog
-          2:
+          2:  # 关键词之后, 到 [ 分号, 结尾, 注释符号] 之前的部分
             patterns:
               - include: "#dataTypes"
               - include: "#constants"
@@ -281,7 +284,8 @@ repository:
               - include: "#sysTasks_Functions"
               - include: "#variableId"
         name: meta.variable.verilog
-      - match: ^\s*(event|genvar)\s+([a-zA-Z_\\][\w\$]*)\b
+      # 匹配 event 和 genvar 声明的变量
+      - match: ^\s*(event|genvar)\s+([a-zA-Z_\\][\w\$]*)\s*;
         captures:
           1:
             name: storage.type.verilog
@@ -295,6 +299,8 @@ repository:
       - begin: \(\*(?=\s*\w) # 排除 (*) 的匹配
         end: \*\)
         patterns:
+          - match: \b([a-zA-Z]\w*)\s*(?==)
+            name: support.other.attribute.verilog
           - include: "#operators"
           - include: "#strings"
           - include: "#constants"

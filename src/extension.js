@@ -9,28 +9,26 @@ const vscode = require('vscode');
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "hyhdl" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('hyhdl.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from HDL coding assistant!');
-	});
-
-	context.subscriptions.push(disposable);
+    // instantiation
+    let dispo_inst = vscode.commands.registerCommand('hyhdl.instantiation', () => {
+        vscode.window.showInformationMessage('module 例化');
+    });
+    context.subscriptions.push(dispo_inst);
+    // testbench
+    let dispo_tb = vscode.commands.registerCommand('hyhdl.testbench', () => {
+        vscode.window.showInformationMessage('生成 testbench');
+    });
+    context.subscriptions.push(dispo_tb);
+    // documentation
+    let dispo_doc = vscode.commands.registerCommand('hyhdl.documentation', () => {
+        vscode.window.showInformationMessage('生成文档');
+    });
+    context.subscriptions.push(dispo_doc);
 }
 
-// this method is called when your extension is deactivated
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
-	activate,
-	deactivate
+    activate,
+    deactivate
 }

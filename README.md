@@ -62,12 +62,19 @@ FPGA工程师写 bug 的小工具
 ## 1.5. Release Notes
 * 暂无
 
+## 1.6. Acknowledgement
+* [mshr-h/vscode-verilog-hdl-support](https://github.com/mshr-h/vscode-verilog-hdl-support)
+* [TerosTechnology/vscode-terosHDL](https://github.com/TerosTechnology/vscode-terosHDL)
+* [Bestduan/Digital-IDE](https://github.com/Bestduan/Digital-IDE)
+* [bitwisecook/vscode-tcl](https://github.com/bitwisecook/vscode-tcl)
+
 ----------------------------------------------------------------
 # 2. 设计思路
 
 ## 2.1. 摘要
-- 插件定位于 coding 的辅助, 尽量仅针对正在编辑的 HDL 文件及其直接引用的文件, 不考虑其所在的工程
-- FPGA/ASIC 工程师一般不会用到 javascript, javascript 代码要尽量少; 为了便于共同维护, 使用 python 编程
+- 插件仅用于辅助 coding，不考虑后续的仿真、综合等流程
+    > 如果想将 VS Code 作为 IDE，可以考虑这两个插件: *TerosTechnology/TerosHDL* 和 *sterben/Digital-IDE*
+- FPGA 工程师一般不会用到 javascript, 因此 js 代码要尽量少，本项目使用 `python` 编程
 - 语言的高级功能尽量使用已有的 LSP 服务器, 降低插件开发的难度
 
 ## 2.2. 各模块设计要点
@@ -78,7 +85,7 @@ FPGA工程师写 bug 的小工具
     - 语言配置文件尽量参考其它插件
 - LSP 客户端
     - 尽量使用已有的 LSP 服务器
-    - 语法错误诊断除了使用 LSP 服务器外, 还需支持 verilator, icarus, modelsim, xvlog
+    - 语法错误诊断除了使用 LSP 服务器外, 尽量支持 modelsim, xvlog
     - 自动补全, 定义, 符号等功能不仅需要考虑当前文件, 还需要考虑直接关联的文件, 如 verilog HDL 代码中 ``` `include <文件>```
     - 格式化工具尽量使用 LSP 服务器提供的, 如果没有, 使用外部的格式化工具, 如 iStyle, verilator, s3sc 等
 - 例化和测试代码的生成

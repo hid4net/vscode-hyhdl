@@ -12,14 +12,26 @@
     ],
     "activationEvents": [
         "onLanguage:verilog",
-        "onCommand:hyhdl.helloWorld"
+        "onCommand:hyhdl.instantiation",
+        "onCommand:hyhdl.testbench",
+        "onCommand:hyhdl.documentation"
     ],
     "main": "./src/extension.js",
     "contributes": {
         "commands": [
             {
-                "command": "hyhdl.helloWorld",
-                "title": "hyhdl.hello",
+                "command": "hyhdl.instantiation",
+                "title": "hyhdl.instantiation",
+                "icon": "$(note)"
+            },
+            {
+                "command": "hyhdl.testbench",
+                "title": "hyhdl.testbench",
+                "icon": "$(package)"
+            },
+            {
+                "command": "hyhdl.documentation",
+                "title": "hyhdl.documentation",
                 "icon": "$(book)"
             }
         ],
@@ -68,14 +80,32 @@
         "menus": {
             "commandPalette": [
                 {
-                    "command": "hyhdl.helloWorld",
-                    "when": "editorLangId == verilog"
+                    "command": "hyhdl.instantiation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog"
+                },
+                {
+                    "command": "hyhdl.testbench",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog"
+                },
+                {
+                    "command": "hyhdl.documentation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog"
                 }
             ],
             "editor/title": [
                 {
-                    "command": "hyhdl.helloWorld",
-                    "when": "editorLangId == verilog",
+                    "command": "hyhdl.instantiation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog",
+                    "group": "navigation"
+                },
+                {
+                    "command": "hyhdl.testbench",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog",
+                    "group": "navigation"
+                },
+                {
+                    "command": "hyhdl.documentation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog",
                     "group": "navigation"
                 }
             ]
