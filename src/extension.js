@@ -1,33 +1,49 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+//==============================================================================
+//DESCRIPTION:
+// *
+//
+//MODIFICATION HISTORY:---------------------------------------------------------
+//   Version | Author | Date       | Changes
+//   :-----: | :----: | :--------: | -------------------------------------------
+//   0.1     | WangXH | 2022-05-12 | start to coding
+//
+//==============================================================================
+"use strict"
+//==============================================================================
 const vscode = require('vscode');
-
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-
+const documentation = require('./documentation/documentation')
+const codeTemplate = require('./codeTemplate/codeTemplate')
+//------------------------------------------------------------------------------
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-    // instantiation
-    let dispo_inst = vscode.commands.registerCommand('hyhdl.instantiation', () => {
-        vscode.window.showInformationMessage('module 例化');
-    });
-    context.subscriptions.push(dispo_inst);
-    // testbench
-    let dispo_tb = vscode.commands.registerCommand('hyhdl.testbench', () => {
-        vscode.window.showInformationMessage('生成 testbench');
-    });
-    context.subscriptions.push(dispo_tb);
-    // documentation
-    let dispo_doc = vscode.commands.registerCommand('hyhdl.documentation', () => {
-        vscode.window.showInformationMessage('生成文档');
-    });
-    context.subscriptions.push(dispo_doc);
+    //---------- codeTemplate: instantiation ----------
+    context.subscriptions.push(
+        vscode.commands.registerCommand('hyhdl.instantiation',
+            () => {
+                vscode.window.showInformationMessage('module 例化');
+            }
+        )
+    );
+    //---------- codeTemplate: testbench ----------
+    context.subscriptions.push(
+        vscode.commands.registerCommand('hyhdl.testbench',
+            () => {
+                vscode.window.showInformationMessage('生成 testbench');
+            }
+        )
+    );
+    //---------- documentation ----------
+    let myDocumentor = new documentation.documentor(context)
+    context.subscriptions.push(
+        vscode.commands.registerCommand('hyhdl.documentation', () => { myDocumentor.openPreview() })
+    );
+
 }
-
+//------------------------------------------------------------------------------
 function deactivate() { }
-
+//------------------------------------------------------------------------------
 module.exports = {
     activate,
     deactivate

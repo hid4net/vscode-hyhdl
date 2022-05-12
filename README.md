@@ -10,7 +10,7 @@ FPGA工程师写 bug 的小工具
     - [x] Verilog
     - [ ] SystemVerilog
     - [ ] VHDL
-    - [ ] TCL
+    - [x] TCL (`.json` is copied from the extension of `bitwisecook.tcl-0.4.0`)
     - [ ] Xilinx xdc
 - 语言服务协议的客户端 (Language Server Protocol (LSP) - client)
     - [ ] 语法错误诊断 (Publish Diagnostics, linting)
@@ -92,10 +92,19 @@ FPGA工程师写 bug 的小工具
     - 研究能否基于 LSP 实现
     - 生成的代码放到剪切板或新文件
     - testbench: 从模板文件中导入例化端口前后的部分, 模板文件要允许用户自己提供
-    - 在编辑器右上角添加命令按钮
+    - [x] 在编辑器右上角添加命令按钮
 - 根据注释生成文档
-    - 参考并移植 `teroshdl` 的代码, 生成 `.md` 文件或 `.html` 文件
-    - 在编辑器右上角添加命令按钮
+    - 打开 webview 显示注释生成的文档信息, 并支持导出 `.md` 或 `.html` 文件 (参考并移植 `teroshdl` 的代码)
+    - 设计概述:
+        - 打开 webview
+            - [x] 触发命令 -> ... -> `vscode.commands.registerCommand` -> ... -> `vscode.window.createWebviewPanel` -> ... ->
+            - [ ] 调用外程序 (基于 Python, 打包成 .exe) 生成 html ->
+            - [x] 更新 html 到 webview
+        - 实时更新 webview
+            - 过程: 注册 `vscode.workspace.onDidOpenTextDocument`, `vscode.workspace.onDidSaveTextDocument`, `vscode.window.onDidChangeVisibleTextEditors` 等事件 -> ... -> 调用外程序 (基于 Python, 打包成 .exe) 生成 html -> 更新 html 到 webview
+        - 导出 webview
+            - 过程: webview 中触发消息 -> ... -> vscode 中接收消息 `<panel 变量>.webview.onDidReceiveMessage` -> 调用外程序 (基于 Python, 打包成 .exe) 生成 `.md` 或 `.html`
+    - [x] 在编辑器右上角添加命令按钮
 
 ## 2.3. 开发路线图
 1. 本人最熟悉 verilog, 先从 verilog 入手开发, 开发顺序
