@@ -1,0 +1,10 @@
+node_modules
+.vscode-test/
+*.vsix
+*.bat
+src/*/_temp_debug/
+src/*/__pycache__/
+src/pyTools/*.bat
+src/pyTools/build/
+src/pyTools/dist/
+src/pyTools/*.spec

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>{{module_name}} - readme</title>
+    <style>
+        button {
+            height: 30px;
+            width: 120px;
+            margin: 2px
+        }
+
+        body {
+            color: black;
+            background-color: white;
+            font-size: 110%;
+            /* max-width: 1080px; */
+            margin: 0 auto;
+            padding: 0 2.5%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        th,
+        td {
+            padding: 6px 10px;
+            border: 1px solid #dfe2e5
+        }
+
+        thead {
+            background-color: #ffd78c
+        }
+
+        tbody tr {
+            background-color: #fff
+        }
+
+        tbody tr:nth-child(2n) {
+            background-color: #f6f8fa
+        }
+    </style>
+    <script>
+        function exportMessage(message) {
+            const vscode = acquireVsCodeApi();
+            vscode.postMessage({
+                command: 'export',
+                text: message
+            })
+        }
+    </script>
+    {% if hasWavedrom %}
+    <script src="{{wavedrom_js_path}}"></script>
+    <!-- 需要使用 vscode 的安全协议 -->
+    <script src="{{wavedrom_theme_path}}"></script>
+    <!-- 需要使用 vscode 的安全协议 -->
+    {% endif %}
+</head>
+
+<body onload="WaveDrom.ProcessAll()">
+    <div style="float:right">
+        <!-- <button id="exportMarkdown" onclick="exportMessage('markdown')">Export markdown</button><br> -->
+        <button id="exportHtml" onclick="exportMessage('html')">Export HTML</button>
+    </div>
+
+    <h1>Entity: {{module_name}}</h1>
+    <hr>
+    <h2>Module</h2>
+    <hr>
+    {{module_diagram}}
+    <br>
+    {% if hasParameters -%}
+    <h3>Parameters</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter name</td>
+                <th>Type</td>
+                <th>Value</td>
+                <th>Description</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in parameters -%}
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.type}}</td>
+                <td>{{item.value}}</td>
+                <td>{{item.description}}</td>
+            </tr> {% endfor %}
+        </tbody>
+    </table> {% endif %}
+    {% if hasPorts -%}
+    <h3>Ports</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Port name</td>
+                <th>Direction</td>
+                <th>Type</td>
+                <th>Description</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in ports -%}
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.direction}}</td>
+                <td>{{item.type}}</td>
+                <td>{{item.description}}</td>
+            </tr>{% endfor %}
+        </tbody>
+    </table> {% endif %}
+    <br>
+    <h2>Notes</h2>
+    <hr>
+    {{notes_html}}
+    <br>
+    <br>
+</body>
+
+</html>
