@@ -99,9 +99,9 @@ class InstTbDoc:
             code = fp.read()
         # -------- simplify code --------
         # 删除 [块注释, 无需文档化的整行注释, 空行]
-        code, _ = re.subn(r"\s*/\*.*?\*/", "\n", code, flags=re.S)  # 删除块注释
-        code, _ = re.subn(r"^\s*//(?!>).*\n", "", code, flags=re.M)  # 删除无需文档化的整行注释
-        code, _ = re.subn(r"^(\r)?\n", "", code, flags=re.M)  # 删除空行
+        code = re.sub(r"\s*/\*.*?\*/", "\n", code, flags=re.S)  # 删除块注释
+        code = re.sub(r"^\s*//(?!>).*\n", "", code, flags=re.M)  # 删除无需文档化的整行注释
+        code = re.sub(r"^(\r)?\n", "", code, flags=re.M)  # 删除空行
         # -------- variables --------
         self.__code = code
         # -------- variables --------
@@ -123,26 +123,27 @@ class InstTbDoc:
         parameters = []
         ports = []
         # -------- 简化 code --------
-        code_m, _ = re.subn(r"^\s*//.*\n", "", self.__code, flags=re.M)  # 删除整行注释
-        code_m, _ = re.subn(r"\(\s*\*.*\*\s*\)\s*", "", code_m)  # 删除属性
+        code_m = re.sub(r"^\s*//.*\n", "", self.__code, flags=re.M)  # 删除整行注释
+        code_m = re.sub(r"\(\s*\*.*\*\s*\)\s*", "", code_m)  # 删除属性
         # -------- 提取 module name --------
-        tmp_code, _ = re.subn(r"//.*\n", "\n", code_m)  # 删除行尾注释
-        if tMatch := re.search(r"module\s*([a-zA-Z_]\w*)\b(.*?;)", tmp_code, re.S):
-            module_name = tMatch.group(1)
-            module_body = tMatch.group(2)
+        tmp_code = re.sub(r"//.*\n", "\n", code_m)  # 删除行尾注释
+        if r_m := re.search(r"module\s*([a-zA-Z_]\w*)\b(.*?;)", tmp_code, re.S):
+            module_name = r_m.group(1)
+            module_body = r_m.group(2)
         else:
             return
-        # -------- 提取参数和端口 --------
+        # -------- 提取参数和端口的文本 --------
         tPos = 0
         # 提取 parameters 文本
-        if tMatch := re.search(r"#\s*\((.*?)\)", module_body, re.S):
-            tPos = tMatch.end()
-            param_text = tMatch.group(1)
+        if r_m := re.search(r"#\s*\((.*?)\)(?:\s*\(.+?\)\s*;)", module_body, re.S):
+            param_text = r_m.group(1)
+            tPos = r_m.end(1)
         else:
             param_text = ""
+
         # 提取 ports 文本
-        if tMatch := re.search(r"\((.*?)\);", module_body[tPos:], re.S):
-            port_text = tMatch.group(1)
+        if r_m := re.search(r"\((.*?)\)\s*;", module_body[tPos:], re.S):
+            port_text = r_m.group(1)
         else:
             port_text = ""
         # -------- 提取 parameters --------
@@ -155,24 +156,24 @@ class InstTbDoc:
                 param_text,
                 re.M,
             ):
-                p_type, _ = re.subn(r"\s+", " ", p_type)
-                for p_name, *rest, p_value in re.findall(r"(\w+)(\s*=\s*(\w+))?", p_var):
+                p_type = p_type.strip()
+                for p_name, a, p_value, *b in re.findall(r"(\w+)(\s*=\s*((\".*\")|([^,]+)))?", p_var):
                     if not p_value:
                         p_value = ""
                     parameters.append(
                         {
                             "name": p_name,
                             "type": p_type,
-                            "value": p_value,
+                            "value": p_value.strip(),
                             "description": "",
                         }
                     )
             #   获取 parameter 的 [description]
             for param in parameters:
-                if tMatch := re.search(
+                if r_m := re.search(
                     r"^\s*parameter\b.+\b" + param["name"] + r"\b.*//(.*)\n", code_m, flags=re.M
                 ):
-                    param["description"] = tMatch.group(1).strip()
+                    param["description"] = r_m.group(1).strip()
         # -------- 提取 ports --------
         if port_text:
             #   获取 port 的 [name, direction, type]
@@ -191,7 +192,7 @@ class InstTbDoc:
                     p_type += f" {port[2]}"
                 if port[3]:
                     p_type += f" {port[3]}"
-                for p_name, *rest in re.findall(r"(\w+)(\s*=\s*(\w+))?", port[4]):
+                for p_name, a, p_value, *b in re.findall(r"(\w+)(\s*=\s*((\".*\")|([^,]+)))?", port[4]):
                     ports.append(
                         {
                             "name": p_name,
@@ -202,12 +203,12 @@ class InstTbDoc:
                     )
             #   获取 port 的 [description]
             for port in ports:
-                if tMatch := re.search(
+                if r_m := re.search(
                     r"^\s*\b" + port["direction"] + r"\b.*\b" + port["name"] + r"\b.*//(.*)\n",
                     code_m,
                     flags=re.M,
                 ):
-                    port["description"] = tMatch.group(1).strip()
+                    port["description"] = r_m.group(1).strip()
         # -------- 更新数据 --------
         self.__module_name = module_name
         self.__module_parameters = parameters
@@ -275,10 +276,10 @@ class InstTbDoc:
             # 找 wave 开头
             for i in range(start, stop):
                 text = comments[i]
-                if tMatch := re.search(r"<(wave(drom|_ya?ml)?)>", text):
+                if r_m := re.search(r"<(wave(drom|_ya?ml)?)>", text):
                     wave_start = i
-                    wave_key = tMatch.group(1)
-                    wave_text += text[tMatch.end() :]
+                    wave_key = r_m.group(1)
+                    wave_text += text[r_m.end() :]
                     indent = _get_comment_indent(text)
                     break
             if wave_start == -1:
@@ -286,9 +287,9 @@ class InstTbDoc:
             # 找 wave 文本和结尾
             for i in range(wave_start + 1, stop):
                 text = comments[i]
-                if tMatch := re.search(f"</{wave_key}>", text):
+                if r_m := re.search(f"</{wave_key}>", text):
                     wave_end = i
-                    wave_text += text[: tMatch.start()]
+                    wave_text += text[: r_m.start()]
                     break
                 else:
                     wave_text += text
@@ -869,8 +870,8 @@ class InstTbDoc:
         name_width = (max(map(len, port_names)) // 4) * 4 + 4
 
         def get_port_rng(port_type):
-            if tMatch := re.search(r"\[.+:.+\]", port_type, re.S):
-                rng, _ = re.subn(r"\s+", " ", tMatch.group(0))
+            if r_m := re.search(r"\[.+:.+\]", port_type, re.S):
+                rng = re.sub(r"\s+", " ", r_m.group(0))
                 return rng
             else:
                 return ""
