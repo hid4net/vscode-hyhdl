@@ -26,13 +26,13 @@ class vlgInstTb {
     // save the code in %tmp%, with "utf-8"
     _save_code() {
         // get code
-        let actEditor = vscode.window.activeTextEditor
+        const actEditor = vscode.window.activeTextEditor
         if (!actEditor) {
             return ""
         }
-        let code = actEditor.document.getText()
+        const code = actEditor.document.getText()
         // save the code to OS.tempFile, with "utf-8"
-        let tmpFile = path.join(os.tmpdir(), 'code')
+        const tmpFile = path.join(os.tmpdir(), 'code')
         fs.writeFileSync(tmpFile, code, 'utf-8')
         return tmpFile
     }
@@ -68,7 +68,7 @@ class vlgInstTb {
 
     // get the testbench template file
     _get_tb_template() {
-        let templateFile = vscode.workspace.getConfiguration("hyhdl").get("Testbench template file path")
+        const templateFile = vscode.workspace.getConfiguration("hyhdl").get("Testbench template file path")
         if (templateFile !== "") {
             if (!fs.existsSync(templateFile)) {
                 vscode.window.showWarningMessage(`useer specified testbench template is not exists, using default template`)
@@ -85,7 +85,7 @@ class vlgInstTb {
             return
         }
         // get the testbench template file
-        let templateFile = this._get_tb_template()
+        const templateFile = this._get_tb_template()
         // format command
         let pyToolCmd = this._get_pyTool() + ` -t "${tmpFile}"`
         if (templateFile) {

@@ -1,120 +1,142 @@
 {
-	"name": "hyhdl",
-	"displayName": "hyhdl",
-	"description": "instantiation/testbench/documentation for verilog",
-	"version": "0.1.5",
-	"publisher": "hid4net",
-	"license": "MIT",
-	"engines": {
-		"vscode": "^1.66.0"
-	},
-	"categories": [
-		"Programming Languages",
-		"Other"
-	],
-	"keywords": [
-		"verilog",
-		"verilog instantiation",
-		"verilog testbench"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/hid4net/vscode-hyhdl"
-	},
-	"bugs": {
-		"email": "hid4net@outlook.com"
-	},
-	"activationEvents": [
-		"onCommand:hyhdl.instantiation",
-		"onCommand:hyhdl.testbench",
-		"onCommand:hyhdl.documentation"
-	],
-	"main": "./src/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "hyhdl.instantiation",
-				"title": "hyhdl.instantiation",
-				"icon": "$(note)"
-			},
-			{
-				"command": "hyhdl.testbench",
-				"title": "hyhdl.testbench",
-				"icon": "$(package)"
-			},
-			{
-				"command": "hyhdl.documentation",
-				"title": "hyhdl.documentation",
-				"icon": "$(book)"
-			}
-		],
-		"menus": {
-			"commandPalette": [
-				{
-					"command": "hyhdl.instantiation",
-					"when": "editorLangId == verilog || editorLangId == systemverilog"
-				},
-				{
-					"command": "hyhdl.testbench",
-					"when": "editorLangId == verilog || editorLangId == systemverilog"
-				},
-				{
-					"command": "hyhdl.documentation",
-					"when": "editorLangId == verilog || editorLangId == systemverilog"
-				}
-			],
-			"editor/title": [
-				{
-					"command": "hyhdl.instantiation",
-					"when": "editorLangId == verilog || editorLangId == systemverilog",
-					"group": "navigation"
-				},
-				{
-					"command": "hyhdl.testbench",
-					"when": "editorLangId == verilog || editorLangId == systemverilog",
-					"group": "navigation"
-				},
-				{
-					"command": "hyhdl.documentation",
-					"when": "editorLangId == verilog || editorLangId == systemverilog",
-					"group": "navigation"
-				}
-			]
-		},
-		"configuration": [
-			{
-				"title": "hyhdl",
-				"properties": {
-					"hyhdl.Testbench template file path": {
-						"type": "string",
-						"default": "",
-						"description": "in the template file (using utf-8 encoding), the symbol \"{{module_name}}\" will be replaced with module name, and the symbol \"{{uut}}\" will be replaced with signals definition and module instantiation"
-					}
-				}
-			}
-		]
-	},
-	"scripts": {
-		"lint": "eslint .",
-		"pretest": "npm run lint"
-	},
-	"devDependencies": {
-		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.1.0",
-		"@types/node": "14.x",
-		"@types/vscode": "^1.66.0",
-		"@vscode/test-electron": "^2.1.3",
-		"eslint": "^8.11.0",
-		"glob": "^7.2.0",
-		"mocha": "^9.2.2",
-		"typescript": "^4.5.5"
-	},
-	"__metadata": {
-		"id": "7d854f0a-3aa2-4bde-ad7d-c88513b6147a",
-		"publisherDisplayName": "hid4net",
-		"publisherId": "7f027235-8717-4219-b0b0-51d649e76809",
-		"isPreReleaseVersion": false,
-		"isApplicationScoped": false,
-		"installedTimestamp": 1660105618367
-	}
+    "name": "hyhdl",
+    "displayName": "hyhdl",
+    "description": "instantiation/testbench/documentation for verilog",
+    "version": "0.1.5",
+    "publisher": "hid4net",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.66.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Other"
+    ],
+    "keywords": [
+        "verilog",
+        "verilog instantiation",
+        "verilog testbench"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hid4net/vscode-hyhdl"
+    },
+    "bugs": {
+        "email": "hid4net@outlook.com"
+    },
+    "activationEvents": [
+        "onLanguage:systemverilog",
+        "onLanguage:verilog"
+    ],
+    "main": "./src/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "hyhdl.instantiation",
+                "title": "hyhdl.instantiation",
+                "icon": "$(note)"
+            },
+            {
+                "command": "hyhdl.testbench",
+                "title": "hyhdl.testbench",
+                "icon": "$(package)"
+            },
+            {
+                "command": "hyhdl.documentation",
+                "title": "hyhdl.documentation",
+                "icon": "$(book)"
+            }
+        ],
+        "languages": [
+            {
+                "id": "verilog",
+                "aliases": [
+                    "Verilog",
+                    "verilog"
+                ],
+                "extensions": [
+                    ".v",
+                    ".vh",
+                    ".vl"
+                ]
+            },
+            {
+                "id": "systemverilog",
+                "aliases": [
+                    "System Verilog",
+                    "systemverilog"
+                ],
+                "extensions": [
+                    ".sv",
+                    ".svh",
+                    ".SV"
+                ]
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "hyhdl.instantiation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog"
+                },
+                {
+                    "command": "hyhdl.testbench",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog"
+                },
+                {
+                    "command": "hyhdl.documentation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "hyhdl.instantiation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog",
+                    "group": "navigation"
+                },
+                {
+                    "command": "hyhdl.testbench",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog",
+                    "group": "navigation"
+                },
+                {
+                    "command": "hyhdl.documentation",
+                    "when": "editorLangId == verilog || editorLangId == systemverilog",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "configuration": [
+            {
+                "title": "hyhdl",
+                "properties": {
+                    "hyhdl.Testbench template file path": {
+                        "type": "string",
+                        "default": "",
+                        "description": "in the template file (using utf-8 encoding), the symbol \"{{module_name}}\" will be replaced with module name, and the symbol \"{{uut}}\" will be replaced with signals definition and module instantiation"
+                    },
+                    "hyhdl.Enable formatter": {
+                        "type": "boolean",
+                        "default": "",
+                        "description": "enable formatter?"
+                    }
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint"
+    },
+    "devDependencies": {
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.0",
+        "@types/node": "14.x",
+        "@types/vscode": "^1.66.0",
+        "@vscode/test-electron": "^2.1.3",
+        "eslint": "^8.11.0",
+        "glob": "^7.2.0",
+        "mocha": "^9.2.2",
+        "typescript": "^4.5.5"
+    }
 }

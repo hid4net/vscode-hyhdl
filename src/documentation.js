@@ -29,11 +29,11 @@ class documentor {
     }
 
     openPreview() {
-        let actEditor = vscode.window.activeTextEditor
+        const actEditor = vscode.window.activeTextEditor
         if (!actEditor) {
             return
         }
-        let actDoc = actEditor.document
+        const actDoc = actEditor.document
         if (actDoc === undefined) {
             return
         }
@@ -73,9 +73,9 @@ class documentor {
     // save the code in %tmp%, with "utf-8"
     _save_code(document) {
         // get code
-        let code = document.getText()
+        const code = document.getText()
         // save the code to OS.tempFile, with "utf-8"
-        let tmpFile = path.join(os.tmpdir(), 'code')
+        const tmpFile = path.join(os.tmpdir(), 'code')
         fs.writeFileSync(tmpFile, code, 'utf-8')
         return tmpFile
     }
@@ -107,12 +107,12 @@ class documentor {
     }
 
     exportHtml(export_type) {
-        let docPath = this.curDocument.uri.fsPath
+        const docPath = this.curDocument.uri.fsPath
         if (fs.existsSync(docPath)) {   // 判断文件是否保存在硬盘中
             // save the code in %tmp%, with "utf-8"
             let tmpFile = this._save_code(this.curDocument)
             // format command
-            let pyToolCmd = this._get_pyTool() + ` -h "${tmpFile}"`
+            let pyToolCmd = this._get_pyTool() + ` -e "${tmpFile}"`
             // run command
             cp.exec(pyToolCmd, (err, stdout, stderr) => {
                 if (err) {
@@ -122,8 +122,8 @@ class documentor {
                 }
                 tmpFile = stdout.replace("\r", "").replace("\n", "");
                 // export the html
-                let tPath = path.parse(docPath)
-                let html_path = path.join(tPath.dir, tPath.name + ".html")
+                const tPath = path.parse(docPath)
+                const html_path = path.join(tPath.dir, tPath.name + ".html")
                 fs.copyFileSync(tmpFile, html_path)
                 vscode.window.showInformationMessage(`hyhdl: The README document has been exported to ${html_path}`)
             });
@@ -134,7 +134,7 @@ class documentor {
     }
 
     updateOpenedPreview(document) {
-        let langId = document.languageId
+        const langId = document.languageId
         if (langId !== "verilog" && langId !== "systemverilog") {
             return
         }
@@ -145,7 +145,7 @@ class documentor {
         if (textEditors.length === 0) {
             return
         }
-        let document = textEditors[textEditors.length - 1].document
+        const document = textEditors[textEditors.length - 1].document
         this.updateOpenedPreview(document)
     }
 }

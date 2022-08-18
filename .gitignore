@@ -2,7 +2,7 @@ node_modules
 .vscode-test/
 *.vsix
 src/*/_temp_debug/
-src/*/__pycache__/
+**/__pycache__/
 src/pyTools/build/
 src/pyTools/dist/
 src/pyTools/*.spec
