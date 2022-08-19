@@ -51,113 +51,135 @@ class VerilogParser:
         """
         解析代码, 提取 module (name, parameters, ports, descriptions)
         """
-        # -------- variable --------
-        module_name = ""
-        parameters = (
-            []
-        )  # list[param_item], 其中 param_item = dict(name:str = xx, type:str = xx, value:str = xx, description:str = xx)
-        ports = (
-            []
-        )  # list[port_item], 其中 port_item = dict(name:str = xx, direction:str = xx, type:str = xx, description:str = xx)
-        # -------- re --------
+        # -------- 思路 --------
+        # 需要的信息: module name, parameter 信息, port 信息
+        #   parameters: list[dict] => 所有必要的信息
+        #       parameter 条目: dict(name:str = xx, type:str = xx, value:str = xx, description:str = xx)
+        #   ports: list[dict] => 所有必要的信息
+        #       port 条目: dict(name:str = xx, direction:str = xx, type:str = xx, description:str = xx)
+        # 处理方法
+        #   1. 删除注释, 以避免干涉解析
+        #   2. 分离 module name 和 body
+        #   3. 从 body 中提取 parameters declaration 和 ports declaration
+        #   4. 提取 parameter item
+        #   5. 提取 ports item
+
+        # -------- 简化 code --------
+        code_m = clean_comment_keep_eol(self.__code)
+        code_m = clean_attribute(code_m)
+        code_m_stub = clean_comment_all(code_m)
+        # -------- 提取 module name 和 body --------
         re_module = re.compile(
             r"module\s*(?P<name>[a-zA-Z_]\w*)\b(?P<body>.*?;)", re.S
         )  # module statement 文本, 需先删除所有注释和属性
-        re_params_text = re.compile(
+        if m := re_module.search(code_m_stub):
+            module_name = m.group("name")
+            module_body = m.group("body")
+        # -------- 判断 module 声明的有效性 --------
+        if not m or not module_name:  # 没有匹配到 module 或 module 没有 name
+            self.module_name = ""
+            self.module_parameters = []
+            self.module_ports = []
+            return
+        elif not module_body:  # 如果没有匹配到 body
+            self.module_name = module_name
+            self.module_parameters = []
+            self.module_ports = []
+            return
+        # -------- 提取 parameters and ports --------
+        parameters = []
+        ports = []
+        # -------- re --------
+        re_param_port_text = re.compile(
             # r"#\s*\((?P<param_text>.*?)\)(?:\s*\(\s*.+?\)\s*;)",
-            r"#\s*\((?P<param_text>.*?)\)" r"(?:\s*\(\s*(input|output|inout).+?\)\s*;)",
+            r"(#\s*\((?P<param>.*?)\))?"  # parameter declarations
+            r"\s*\(\s*(?P<port>(input|output|inout).+?)\)\s*;",  # port declarations
             re.S,
         )  # parameters statement 文本, 需先删除所有注释和属性
         re_param_item = re.compile(
-            r"^\s*parameter"
-            r"\s*(((signed)?\s*(\[.+:.+\])?)|integer|real|realtime|time)?"  # 1: 类型 (整体); 2: 类型(signed range); 3: singed, 4: range
-            r"\s*([a-zA-Z_].*)\n",  # 5: name=value
-            re.M,
+            r"parameter"  # keyword
+            r"\s*(?P<type>((?P<signed>signed)?\s*(?P<range>\[[^:]+:[^:]+\])?)|integer|real|realtime|time)?"  # type
+            r"\s*(?P<var>[a-zA-Z_]\w*)"  # variable
+            r"\s*(=\s*(?P<value>.+?))?"  # value
+            r"\s*(,(?=\s*parameter)|\Z)",  # separator
+            re.S,
         )
-        re_ports_text = re.compile(
-            r"\((\s*(input|output|inout).+)\)\s*;", re.S
-        )  # ports statement 文本, 需先删除所有注释和属性
+        # parameter_declaration ::= parameter [ signed ] [ range ] list_of_param_assignments ;
+        #                         | parameter integer list_of_param_assignments ;
+        #                         | parameter real list_of_param_assignments ;
+        #                         | parameter realtime list_of_param_assignments ;
+        #                         | parameter time list_of_param_assignments ;
         re_port_item = re.compile(
-            r"^\s*(input|output|inout)"  # 1: direction
-            r"\s*(wire|wand|wor|tri|tri0|tri1|triand|trior|trireg|reg)?"  # 2: type
-            r"\s*(signed)?"  # 3: singed
-            r"\s*(\[.+:.+\])?"  # 4: range
-            r"\s*([a-zA-Z_].*)$",  # 5: name=value
-            re.M,
+            r"(?P<direction>input|output|inout)"  # direction
+            r"\s*(?P<type>wire|wand|wor|tri|tri0|tri1|triand|trior|trireg|reg)?"  # type
+            r"\s*(?P<signed>signed)?"  # singed
+            r"\s*(?P<range>\[[^:]+:[^:]+\])?"  # range
+            r"\s*(?P<var>[a-zA-Z_]\w*)"  # variable
+            r"\s*(=\s*(?P<value>.+?))?"  # value
+            r"\s*(,(?=\s*(input|output|inout))|\Z)",  # separator
+            re.S,
         )
-        re_var_value = re.compile(r"(?P<var>\w+)(\s*=\s*(?P<value>(\".*\")|([^\s,]+)))?")
-        # -------- 简化 code --------
-        code_m = clean_commemt(self.__code, "blk")
-        code_m = clean_commemt(code_m, "lnf")
-        code_m = clean_attribute(code_m)
-        # -------- 提取 module name --------
-        if m := re_module.search(clean_commemt(code_m, "lnt")):
-            module_name = m.group(1)
-            module_body = m.group(2)
-        else:
-            return
+        # inout_declaration ::= inout [ net_type ] [ signed ] [ range ] list_of_port_identifiers
+        # input_declaration ::= input [ net_type ] [ signed ] [ range ] list_of_port_identifiers
+        # output_declaration ::= output [ net_type ] [ signed ] [ range ] list_of_port_identifiers
+        #                      | output [ reg ] [ signed ] [ range ] list_of_port_identifiers
+        #                      | output reg [ signed ] [ range ] list_of_variable_port_identifiers
+        #                      | output [ output_variable_type ] list_of_port_identifiers
+        #                      | output output_variable_type list_of_variable_port_identifiers
         # -------- 提取参数和端口的文本 --------
-        pos = 0
-        # 提取 parameters 文本
-        if m := re_params_text.search(module_body):
-            param_text = m.group(1)
-            pos = m.end(1)
-        else:
-            param_text = ""
-        # 提取 ports 文本
-        if m := re_ports_text.search(module_body[pos:]):
-            port_text = m.group(1)
-        else:
-            port_text = ""
-        # -------- 提取 parameters --------
-        if param_text:
-            #   获取 parameter 的 [name, type, value]
-            for p_type, *a, p_var_val in re_param_item.findall(param_text):
-                p_type = p_type.strip()
-                for p_name, a, p_value, *b in re_var_value.findall(p_var_val):
-                    # if not p_value:
-                    #     p_value = ""
+        if m := re_param_port_text.search(module_body):
+            param_text = m.group("param")
+            port_text = m.group("port")
+            # -------- 提取 parameters --------
+            if param_text:
+                # 获取 parameter 的 [name, type, value]
+                for m in re_param_item.finditer(param_text):
                     parameters.append(
                         {
-                            "name": p_name,
-                            "type": p_type,
-                            "value": p_value,
+                            "name": m.group("var"),
+                            "type": shorten_spaces(m.group("type")),
+                            "value": m.group("value"),
                             "description": "",
                         }
                     )
-            #   获取 parameter 的 [description]
-            for param in parameters:
-                if m := re.search(
-                    r"^\s*parameter\b.+\b" + param["name"] + r"\b.*//\s*(.*)\n", code_m, flags=re.M
-                ):
-                    param["description"] = m.group(1)
-        # -------- 提取 ports --------
-        if port_text:
-            #   获取 port 的 [name, direction, type]
-            for port in re_port_item.findall(port_text):
-                p_direction = port[0]
-                p_type = port[1] if port[1] else "(wire)"
-                if port[2]:
-                    p_type += f" {port[2]}"
-                if port[3]:
-                    p_type += f" {port[3]}"
-                for p_name, a, p_value, *b in re_var_value.findall(port[4]):
+                # 获取 parameter 的 [description]
+                for param in parameters:
+                    if m := re.search(
+                        r"parameter\b.+\b" + param["name"] + r"\b.*//\s*(?P<d>.*)\s*\n", code_m
+                    ):
+                        param["description"] = m.group("d")
+            # -------- 提取 ports --------
+            if port_text:
+                # 获取 port 的 [name, direction, type]
+                for m in re_port_item.finditer(port_text):
+                    if t := m.group("type"):
+                        p_type = t
+                    else:
+                        p_type = "(wire)"
+                    if t := m.group("signed"):
+                        p_type = f" {t}"
+                    if t := m.group("range"):
+                        t = shorten_spaces(t)
+                        p_type = f" {t}"
+                    #
                     ports.append(
                         {
-                            "name": p_name,
-                            "direction": p_direction,
+                            "name": m.group("var"),
+                            "direction": m.group("direction"),
                             "type": p_type,
                             "description": "",
                         }
                     )
-            #   获取 port 的 [description]
-            for port in ports:
-                if m := re.search(
-                    r"^\s*\b" + port["direction"] + r"\b.*\b" + port["name"] + r"\b.*//\s*(.*)\n",
-                    code_m,
-                    flags=re.M,
-                ):
-                    port["description"] = m.group(1)
+                # 获取 port 的 [description]
+                for port in ports:
+                    if m := re.search(
+                        r"\b" + port["direction"] + r"\b"  # direction
+                        r".*"
+                        r"\b" + port["name"] + r"\b"  # name
+                        r".*//\s*(?P<d>.*)\s*\n",
+                        code_m,
+                    ):
+                        port["description"] = m.group("d")
         # -------- 更新数据 --------
         self.module_name = module_name
         self.module_parameters = parameters
@@ -170,14 +192,27 @@ class VerilogParser:
         """
         解析注释, 从中提取 [wavedrom 数据, table 数据, 普通文字行]
         """
+        # -------- 提取需要 documentation 的注释 --------
+        cmt_lines = get_comment_doc(self.__code)  # 需要文档化的整行注释
+        if not cmt_lines:
+            self.comment_items = []
+            self.has_wavedrom = False
+            return
+        # -------- 处理注释 --------
         # -------- variable --------
         comment_items = []
         has_wavedrom = False
-        # -------- 如果没有需要处理的注释 --------
-        cmt_lines = re_cmt_line_doc.findall(self.__code)  # 需要文档化的整行注释
-        if not cmt_lines:
-            return
         cmt_line_tot = len(cmt_lines)
+        # -------- re --------
+        re_wave_token_start = re.compile(r"<(?P<token>wave(drom|_ya?ml)?)>")
+        re_wave_token_end = re.compile(r"</(?P<token>wave\w*)>")
+        re_table_head = re.compile(r"^[ \t]*(\|)?(.+?(?<!\\)\|)+.*$", re.M)
+        re_table_align = re.compile(r"^[ \t]*(\|)?(\s*[:-]-+[-:]\s*(?<!\\)\|)+.*$", re.M)
+        re_table_body = re.compile(r"^[ \t]*(\|)?(.+?(?<!\\)\|)+.*$", re.M)
+        re_table_item_split = re.compile(r"(?<!\\)\|")
+        re_line_chapter = re.compile(r"\s*#\s+.*$")
+        re_line_list = re.compile(r"\s*([\*\+-]|\d+\.)\s+.*$")
+        re_line_empty = re.compile(r"\s*$")
         # -------- 计算缩进 --------
         def get_doc_indent(text):
             return get_indent(text, 3) - 3
@@ -205,28 +240,28 @@ class VerilogParser:
             # 找 wave 开头
             for i in range(start, stop):
                 text = cmt_lines[i]
-                if m := re.search(r"<(wave(drom|_ya?ml)?)>", text):
+                if m := re_wave_token_start.search(text):
                     wave_start = i
-                    wave_key = m.group(1)
-                    wave_text += text[m.end() :]
+                    wave_token = m.group("token")
                     indent = get_doc_indent(text)
+                    wave_text += text[m.end() :]
                     break
-            if wave_start == -1:
+            else:
                 return None
             # 找 wave 文本和结尾
             for i in range(wave_start + 1, stop):
                 text = cmt_lines[i]
-                if m := re.search(f"</{wave_key}>", text):
+                if m := re_wave_token_end.search(text):
                     wave_end = i
-                    wave_text += text[: m.start()]
+                    wave_text += text[indent : m.start()]
                     break
                 else:
-                    wave_text += text
-            if wave_end == -1:
+                    wave_text += text[indent:] + "\n"
+            else:
                 return None
             # -------- 处理 wavedrom --------
             # 如果找到 <wavedrom> ... </wavedrom>
-            if wave_key in ("wave", "wavedrom"):
+            if wave_token in ("wave", "wavedrom"):
                 wave_text = wave_text.strip()
                 try:
                     wave_dict = json.loads(wave_text)
@@ -241,7 +276,7 @@ class VerilogParser:
                 except:
                     return None
             # 如果找到 <wave_yaml> ... </wave_yaml>
-            elif wave_key in ("wave_yaml", "wave_yml"):
+            elif wave_token in ("wave_yaml", "wave_yml"):
                 try:
                     wave_dict = yaml.load(wave_text, yaml.Loader)
                 except:
@@ -283,25 +318,19 @@ class VerilogParser:
             for i in range(start, stop):
                 text = cmt_lines[i]
                 # 找 table head
-                if re.search(r"^[ \t]*(\|)?(.+\|)+.*\n", text, re.M):
+                if re_table_head.search(text):
                     indent = get_doc_indent(text)
                 else:
                     continue
                 # 找 table align
                 text = cmt_lines[i + 1]
-                if (
-                    re.search(r"^[ \t]*(\|)?(\s*[:-]-+[-:]\s*\|)+.*\n", text, re.M)
-                    and get_doc_indent(text) == indent
-                ):
+                if re_table_align.search(text) and get_doc_indent(text) == indent:
                     pass
                 else:
                     continue
                 # 找 table body
                 text = cmt_lines[i + 2]
-                if (
-                    re.search(r"^[ \t]*(\|)?(.+\|)+.*\n", text, re.M)
-                    and get_doc_indent(text) == indent
-                ):
+                if re_table_body.search(text) and get_doc_indent(text) == indent:
                     table_start = i
                     table_end = table_start + 2
                     break
@@ -312,10 +341,7 @@ class VerilogParser:
             # 找 table 剩余的 body
             for i in range(table_start + 3, stop):
                 text = cmt_lines[i]
-                if (
-                    re.search(r"^[ \t]*(\|)?(.+\|)+.*\n", text, re.M)
-                    and get_doc_indent(text) == indent
-                ):
+                if re_table_body.search(text) and get_doc_indent(text) == indent:
                     table_end = i
                 else:
                     break
@@ -329,13 +355,14 @@ class VerilogParser:
                 else:
                     return "left"
 
-            thead = [x.strip(" ") for x in cmt_lines[table_start][:-1].split("|")]  # 表头项
+            thead = [x.strip(" ") for x in re_table_item_split.split(cmt_lines[table_start])]  # 表头项
             talign = [
-                get_align(x.strip(" ")) for x in cmt_lines[table_start + 1][:-1].split("|")
+                get_align(x.strip(" "))  # 获取对齐方式
+                for x in re_table_item_split.split(cmt_lines[table_start + 1])
             ]  # 对齐方式
             tbody = []
             for i in range(table_start + 2, table_end + 1):
-                tbody.append([x.strip(" ") for x in cmt_lines[i][:-1].split("|")])
+                tbody.append([x.strip(" ") for x in re_table_item_split.split(cmt_lines[i])])
             # -------- 返回数据 --------
             return (
                 table_start,
@@ -363,36 +390,19 @@ class VerilogParser:
                 data: str => 文本,\n
                 indent: int => 缩进
             """
-
+            # -------- variable --------
             tList = []
+            # -------- 处理 --------
             for line in cmt_lines[start:stop]:
                 indent = get_doc_indent(line)
-                if re.fullmatch(r"\s*#\s+.*$", line):  # chapter
-                    tList.append(
-                        {
-                            "type": "header",
-                            "data": line,
-                            "indent": indent,
-                        }
-                    )
-                elif re.fullmatch(r"\s*([\*\+-]|\d+\.)\s+.*$", line):  # list
-                    tList.append(
-                        {
-                            "type": "list",
-                            "data": line,
-                            "indent": indent,
-                        }
-                    )
-                elif re.fullmatch(r"\s*$", line):  # normal
-                    pass
-                else:
-                    tList.append(
-                        {
-                            "type": "normal",
-                            "data": line,
-                            "indent": indent,
-                        }
-                    )
+                tList.append(
+                    {
+                        "type": "normal",
+                        "data": line,
+                        "indent": indent,
+                    }
+                )
+            # -------- return --------
             return tList
 
         # -------- 解析 cmt_lines --------

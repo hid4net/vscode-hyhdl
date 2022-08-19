@@ -19,73 +19,89 @@ import re
 # 与 verilog 相关的正则表达式常量
 # ------------------------------------------------------------------------------
 # -------- 注释 --------
-re_cmt_block = re.compile(r"/\*.*?\*/", re.S)  # 块注释
-re_cmt_line_whole = re.compile(r"^\s*//.*\n", re.M)  # 整行注释
-re_cmt_line_tail = re.compile(r"\s*//.*\n")  # 行尾注释
-re_cmt_line_doc = re.compile(r"^\s*//>(.*\n)", re.M)  # 需要 documentation 的注释
-re_cmt_line_nodoc = re.compile(r"^\s*//(?!>).*\n", re.M)  # 无需 documentation 的注释
+# 参考: re.compile(r'//.*?$|/\*.*?\*/|\(\s*(\*)\s*\)|\(\*.*?\*\)|"(?:\\.|[^\\"])*"', re.S | re.M)
+re_comment = re.compile(
+    r"(?P<cmt_d>^\s*//>.*?$)|"  # 全行注释: 需要 documentation, 优先级: 0 (最高)
+    r"(?P<cmt_D>^\s*//(?!>).*?$)|"  # 全行注释: 无需 documentation, 优先级: 0 (最高)
+    r"(?P<cmt_eol>//.*?$)|"  # 行尾注释, 优先级: 1
+    r"(?P<block>/\*.*?\*/)|"  # 块注释, 优先级: 2
+    r'(?P<string>(?<!\\)".*?(?<!\\)")',  # 字符串, 防止字符串中的注释符号影响匹配, 优先级: 3
+    re.S | re.M,
+)  # 匹配顺序不能随意调换
 # -------- attribute --------
-re_attribute = re.compile(r"\(\s*\*.*\*\s*\)\s*")  # attribute
-# -------- empty line --------
+# 参考: re.compile(r'//.*?$|/\*.*?\*/|\(\s*(\*)\s*\)|\(\*.*?\*\)|"(?:\\.|[^\\"])*"', re.S | re.M)
+re_attribute = re.compile(
+    r"(?P<attr>\(\*.*?\*\))|"  # attribute
+    r'(?P<string>(?<!\\)".*?(?<!\\)")',  # 字符串, 防止字符串中的 attribute 干扰匹配
+    re.S,
+)
+# -------- blank --------
 # re_empty_line = re.compile(r"^\r?\n", re.M)  # 空行
 
 # %% ---------------------------------------------------------------------------
 # 删除注释
 # ------------------------------------------------------------------------------
-def clean_commemt(text: str, cmtype: str) -> str:
-    """
-    删除注释\n
-    text: str => 输入文本\n
-    cmtype: str => 指定注释类型:\n
-        'all': 所有注释\n
-        'blk': 块注释\n
-        'lnf': 行注释 (整行)\n
-        'lnt': 行注释 (行尾)\n
-        'lnd': 行注释 (需要 documentation 的行注释)\n
-        'lnD': 行注释 (无需 documentation 的行注释)\n
-    return: str => 处理后的文本
-    """
-    rslt = text
-    match cmtype:
-        case "all":
-            rslt = re_cmt_block.sub("", text)  # 删除块注释
-            rslt = re_cmt_line_tail.sub("\n", text)  # 删除行尾注释
-        case "blk":
-            rslt = re_cmt_block.sub("", text)  # 删除块注释
-        case "lnf":
-            rslt = re_cmt_line_whole.sub("", text)  # 删除整行注释
-        case "lnt":
-            rslt = re_cmt_line_tail.sub("\n", text)  # 删除行尾注释
-        case "lnd":
-            rslt = re_cmt_line_doc.sub("", text)  # 删除无需文档化的整行注释
-        case "lnD":
-            rslt = re_cmt_line_nodoc.sub("", text)  # 删除无需文档化的整行注释
-    return rslt
+def clean_comment_all(text: str) -> str:
+    """删除 verilog 代码中所有的注释
+    text: str => verilog 代码\n
+    return: str => 处理后的代码"""
+    # def replacer(m:re.Match) -> str:
+    #     if m.group("string"):
+    #         return m.group("string")
+    #     else:
+    #         return ""
+    return re_comment.sub(
+        lambda m: m.group(0) if m.group("string") else "",
+        text,
+    )
+
+
+def clean_comment_keep_eol(text: str) -> str:
+    """删除 verilog 代码中所有的注释
+    text: str => verilog 代码\n
+    return: str => 处理后的代码"""
+    # def replacer(m:re.Match) -> str:
+    #     if m.group("string") or m.group("cmt_eol"):
+    #         return m.group(0)
+    #     else:
+    #         return ""
+    return re_comment.sub(
+        lambda m: m.group(0) if m.group("string") or m.group("cmt_eol") else "",
+        text,
+    )
 
 
 # %% ---------------------------------------------------------------------------
 # 删除 attribute
 # ------------------------------------------------------------------------------
 def clean_attribute(text: str) -> str:
-    """
-    删除 attribute\n
-    text: str => 输入文本\n
-    return: str => 处理后的文本
-    """
-    return re_attribute.sub("", text)  # 删除属性
+    """删除 verilog 代码中所有 attribute
+    text: str => verilog 代码\n
+    return: str => 处理后的代码"""
+    return re_attribute.sub(
+        lambda m: m.group(0) if m.group("string") else " ",
+        text,
+    )
 
 
 # %% ---------------------------------------------------------------------------
-# 删除空行
+# 获取需要 documentation 的注释
 # ------------------------------------------------------------------------------
-# def clean_empty_line(text: str) -> str:
-#     """
-#     删除空行\n
-#     text: str => 输入文本\n
-#     return: str => 处理后的文本
-#     """
-#     return re_empty_line.sub("", text)  # 删除空行
+def get_comment_doc(text: str) -> list[str]:
+    """获取 verilog 代码中需要 documentation 的行注释
+    text: str => verilog 代码\n
+    return: list[str] => 匹配到的行注释的列表"""
+    return [x[0][3:] for x in re_comment.findall(text) if x[0]]
 
+
+# %% ---------------------------------------------------------------------------
+# 缩短词间空格
+# ------------------------------------------------------------------------------
+def shorten_spaces(text: str) -> str:
+    """缩短所有空白为一个空格
+    text: str => verilog 代码\n
+    return: str => 处理后的代码"""
+    return re.sub("\s+", " ", text)
 
 # %% ---------------------------------------------------------------------------
 # 计算缩进

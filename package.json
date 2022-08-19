@@ -2,7 +2,7 @@
     "name": "hyhdl",
     "displayName": "hyhdl",
     "description": "instantiation/testbench/documentation for verilog",
-    "version": "0.1.5",
+    "version": "0.1.7",
     "publisher": "hid4net",
     "license": "MIT",
     "engines": {
@@ -25,8 +25,9 @@
         "email": "hid4net@outlook.com"
     },
     "activationEvents": [
-        "onLanguage:systemverilog",
-        "onLanguage:verilog"
+		"onCommand:hyhdl.instantiation",
+		"onCommand:hyhdl.testbench",
+		"onCommand:hyhdl.documentation"
     ],
     "main": "./src/extension.js",
     "contributes": {
@@ -45,32 +46,6 @@
                 "command": "hyhdl.documentation",
                 "title": "hyhdl.documentation",
                 "icon": "$(book)"
-            }
-        ],
-        "languages": [
-            {
-                "id": "verilog",
-                "aliases": [
-                    "Verilog",
-                    "verilog"
-                ],
-                "extensions": [
-                    ".v",
-                    ".vh",
-                    ".vl"
-                ]
-            },
-            {
-                "id": "systemverilog",
-                "aliases": [
-                    "System Verilog",
-                    "systemverilog"
-                ],
-                "extensions": [
-                    ".sv",
-                    ".svh",
-                    ".SV"
-                ]
             }
         ],
         "menus": {
@@ -114,11 +89,6 @@
                         "type": "string",
                         "default": "",
                         "description": "in the template file (using utf-8 encoding), the symbol \"{{module_name}}\" will be replaced with module name, and the symbol \"{{uut}}\" will be replaced with signals definition and module instantiation"
-                    },
-                    "hyhdl.Enable formatter": {
-                        "type": "boolean",
-                        "default": "",
-                        "description": "enable formatter?"
                     }
                 }
             }

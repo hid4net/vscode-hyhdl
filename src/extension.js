@@ -13,7 +13,6 @@
 const vscode = require('vscode');
 const codeTemplate = require('./codeTemplate')      // myCode: realize instantiation and testbench generation
 const documentation = require('./documentation')    // myCode: realize documentation
-const formatter = require('./formatter')            // myCode: realize formatter
 //------------------------------------------------------------------------------
 /**
  * @param {vscode.ExtensionContext} context
@@ -32,17 +31,6 @@ function activate(context) {
         // vscode.window.onDidChangeActiveTextEditor((e) => (myDocumentor.updateOpenedPreview(e))),
         vscode.window.onDidChangeVisibleTextEditors((e) => { myDocumentor.updatePreviewOnVisible(e) }), // myCode: update the documentation preview when the visibility of the verilog file is changed
     );
-    //---------- formatter ----------
-    const enFmt = vscode.workspace.getConfiguration("hyhdl").get("Enable formatter")    // myCode: instantiate a object
-    if (enFmt) {
-        const myFormatter = new formatter.formatter(context)
-        context.subscriptions.push(
-            vscode.languages.registerDocumentFormattingEditProvider(    // myCode: register formatter
-                [{ scheme: "file", language: "verilog" }, { scheme: "file", language: "systemverilog" }],   // myCode: avaliable file type
-                { provideDocumentFormattingEdits(document) { return myFormatter.doFormat(document) } }      // myCode: do format
-            )
-        );
-    }
 }
 //------------------------------------------------------------------------------
 function deactivate() { }
