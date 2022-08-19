@@ -157,10 +157,10 @@ class VerilogParser:
                     else:
                         p_type = "(wire)"
                     if t := m.group("signed"):
-                        p_type = f" {t}"
+                        p_type += f" {t}"
                     if t := m.group("range"):
                         t = shorten_spaces(t)
-                        p_type = f" {t}"
+                        p_type += f" {t}"
                     #
                     ports.append(
                         {

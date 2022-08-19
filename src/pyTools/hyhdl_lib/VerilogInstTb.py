@@ -129,17 +129,19 @@ class VerilogInstTb(VerilogParser):
             param_names = [x["name"] for x in parameters]
             values = [x["value"] for x in parameters]
             name_width = ((max(map(len, param_names)) + 2) // 4) * 4 + 2
-            value_width = ((max(map(len, values)) + 2) // 4) * 4 + 2
+            # value_width = ((max(map(len, values)) + 2) // 4) * 4 + 2
+            value_width = max(map(len, values))
 
             uut += f"    // parameters\n"
             for p in parameters:
                 uut += (
                     f'    parameter {p["name"].ljust(name_width)}= {p["value"].ljust(value_width)};'
-                    f'   // {p["description"]}\n'
+                    f'  // {p["description"]}\n'
                 )
         # 输出 ports 的声明
         port_names = [x["name"] for x in ports]
-        name_width = (max(map(len, port_names)) // 4) * 4 + 4
+        # name_width = (max(map(len, port_names)) // 4) * 4 + 4
+        name_width = max(map(len, port_names))
 
         def get_port_rng(port_type):
             if r_m := re.search(r"\[.+:.+\]", port_type, re.S):
@@ -159,7 +161,7 @@ class VerilogInstTb(VerilogParser):
                 uut += "    wire "
             uut += (
                 f'{rng.rjust(rng_width)} {p["name"].ljust(name_width)};'
-                f'   // {p["description"]}\n'
+                f'  // {p["description"]}\n'
             )
         # 输出 module instantiation
         uut += f"    // module\n"

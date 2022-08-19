@@ -337,11 +337,24 @@ class VerilogDocumentor(VerilogParser):
         # -------- 整理数据 --------
         parameters = self.module_parameters
         ports = self.module_ports
+        hasWavedrom = self.has_wavedrom
+        if hasWavedrom:
+            pytools_dir = Path(self.__pytools_dir)
+            with Path(pytools_dir).joinpath("wavedrom", "wavedrom.min.js").open("r",encoding="utf-8") as fp:
+                wavedrom_js_text = fp.read()
+            with Path(pytools_dir).joinpath("wavedrom", "default.js").open("r",encoding="utf-8") as fp:
+                wavedrom_theme_text = fp.read()
+        else:
+            wavedrom_js_text = ""
+            wavedrom_theme_text = ""
+
         # -------- 替换模板 --------
         env = Environment(loader=FileSystemLoader(tmplt_path.parent))
         tmpl = env.get_template(tmplt_path.name)
         text = tmpl.render(
-            hasWavedrom=self.has_wavedrom,
+            hasWavedrom=hasWavedrom,
+            wavedrom_js_text=wavedrom_js_text,
+            wavedrom_theme_text=wavedrom_theme_text,
             module_name=self.module_name,
             module_diagram=self._draw_module_bd(),
             parameters=parameters,
