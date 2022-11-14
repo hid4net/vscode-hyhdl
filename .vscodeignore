@@ -7,10 +7,10 @@ vsc-extension-quickstart.md
 **/jsconfig.json
 **/*.map
 **/.eslintrc.json
-src/*/_temp_debug/
-src/*/__pycache__/
 src/pyTools/*.bat
 src/pyTools/build/
 src/pyTools/dist/
 src/pyTools/*.spec
-*.bat
+**/_temp_debug/
+**/__pycache__/
+**/*.bat

@@ -91,7 +91,7 @@ def get_comment_doc(text: str) -> list[str]:
     """获取 verilog 代码中需要 documentation 的行注释
     text: str => verilog 代码\n
     return: list[str] => 匹配到的行注释的列表"""
-    return [x[0][3:] for x in re_comment.findall(text) if x[0]]
+    return [re.sub(r"\s*//>", "", x[0]) for x in re_comment.findall(text) if x[0]]
 
 
 # %% ---------------------------------------------------------------------------
@@ -102,6 +102,7 @@ def shorten_spaces(text: str) -> str:
     text: str => verilog 代码\n
     return: str => 处理后的代码"""
     return re.sub("\s+", " ", text)
+
 
 # %% ---------------------------------------------------------------------------
 # 计算缩进

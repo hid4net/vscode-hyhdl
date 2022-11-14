@@ -53,10 +53,11 @@
         }
     </script>
     {% if hasWavedrom %}
-    <script src="{{wavedrom_js_path}}"></script>
-    <!-- 需要使用 vscode 的安全协议 -->
-    <script src="{{wavedrom_theme_path}}"></script>
-    <!-- 需要使用 vscode 的安全协议 -->
+    <script type="text/javascript">
+        {{wavedrom_js_text}}
+
+        {{wavedrom_theme_text}}
+    </script>
     {% endif %}
 </head>
 

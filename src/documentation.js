@@ -46,7 +46,8 @@ class documentor {
                 {
                     enableScripts: true,
                     retainContextWhenHidden: true,
-                    localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, "src", "pyTools", "wavedrom")]
+                    // localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, "src", "pyTools", "wavedrom")]
+                    localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, "src", "pyTools", "wavedrom"))]
                 }
             );
             this.panel.onDidDispose(
