@@ -40,7 +40,11 @@ class vlgInstTb {
     // get the path of the "pyTool"
     _get_pyTool() {
         let pyTool = path.join(this.context.extensionUri.fsPath, "src", "pyTools", "hyhdl")
-        pyTool += (os.platform() == 'win32') ? ".exe" : ".py"
+        if (os.platform() == 'win32') {
+            pyTool += '.exe'
+        } else {
+            pyTool = "python3 " + pyTool + '.py'
+        }
         return pyTool
     }
 
@@ -68,10 +72,10 @@ class vlgInstTb {
 
     // get the testbench template file
     _get_tb_template() {
-        const templateFile = vscode.workspace.getConfiguration("hyhdl").get("Testbench template file path")
+        let templateFile = vscode.workspace.getConfiguration("hyhdl").get("Testbench template file path")
         if (templateFile !== "") {
             if (!fs.existsSync(templateFile)) {
-                vscode.window.showWarningMessage(`useer specified testbench template is not exists, using default template`)
+                vscode.window.showWarningMessage(`user specified testbench template does not exist, using default template`)
                 templateFile = ""
             }
         }

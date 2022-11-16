@@ -84,7 +84,11 @@ class documentor {
     // get the path of the "pyTool"
     _get_pyTool() {
         let pyTool = path.join(this.context.extensionUri.fsPath, "src", "pyTools", "hyhdl")
-        pyTool += (os.platform() == 'win32') ? ".exe" : ".py"
+        if (os.platform() == 'win32') {
+            pyTool += '.exe'
+        } else {
+            pyTool = "python3 " + pyTool + '.py'
+        }
         return pyTool
     }
 

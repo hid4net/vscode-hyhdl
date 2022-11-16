@@ -60,6 +60,8 @@ def main(option, verilog_file, template_file):
         # ! debug end
     elif option == 2:  # for testbench
         pyTool = VerilogInstTb(verilog_file)
+        if not template_file or not Path(template_file).exists:
+            template_file = pyTool_dir.joinpath("testbenchTemplate.v")
         tmpf = pyTool.get_testbench(template_file)
         # ! debug start
         pyTool.dump_parsed()

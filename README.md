@@ -3,11 +3,11 @@ Generate the code of instantiation and testbench, the documentation of the modul
 
 ## 1.1. Features
 - Instantiation and Testbench generation
-    - [x] Verilog
-    - [ ] SystemVerilog
+    - Verilog: ok
+    - SystemVerilog: partially compatible
 - Documentation
-    - [x] Verilog
-    - [ ] SystemVerilog
+    - Verilog: ok
+    - SystemVerilog: partially compatible
 
 ## 1.2. Usage
 * Instantiation
@@ -80,7 +80,7 @@ Generate the code of instantiation and testbench, the documentation of the modul
 
 ## 1.5. Known Issues, Bugs Feedback
 * this extension is only tested with verilog files, and only tested in Windows 10
-    * this extension is ought to work in linux or MAC OS with python 3.10 installed
+    * this extension is ought to work in linux or MAC OS with python 3.10 (with lib `PyYaml` and `Jinja2`) installed
     * this extension may not work regularly for SystemVerilog
 * If a bug occurs, please e-mail the `hyhdl_dump` file to _hid4net@outlook.com_
     * the `hyhdl_dump` file is stored in the OS's temporary directory

@@ -117,10 +117,10 @@ class VerilogInstTb(VerilogParser):
         module_name = self.module_name
         parameters = self.module_parameters
         ports = self.module_ports
-        tPath = Path(template_fname)
-
-        if not (module_name and ports and tPath.exists()):
+        if not (module_name and ports):
             return ""
+
+        tPath = Path(template_fname)
         # -------- 生成 uut 代码 --------
         uut = ""
         # uut += f"    // module instantiation\n"
