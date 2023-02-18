@@ -61,7 +61,7 @@ def main(option, verilog_file, template_file):
     elif option == 2:  # for testbench
         pyTool = VerilogInstTb(verilog_file)
         if not template_file or not Path(template_file).exists:
-            template_file = pyTool_dir.joinpath("testbenchTemplate.v")
+            template_file = pyTool_dir.joinpath("testbenchTemplate")
         tmpf = pyTool.get_testbench(template_file)
         # ! debug start
         pyTool.dump_parsed()
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     pyTool_dir = Path(sys.argv[0]).absolute().parent
 
     ap = argparse.ArgumentParser(
-        description="Generate the instantiation, testbench and documentation for verilog"
+        description="Generate the instantiation, testbench or documentation for verilog"
     )
 
     apg = ap.add_mutually_exclusive_group(required=True)
@@ -136,13 +136,8 @@ if __name__ == "__main__":
     )
 
     arg_parsed = ap.parse_args()
+    # print(f"{arg_parsed.opt=}")
+    # print(f"{arg_parsed.verilog_file=}")
+    # print(f"{arg_parsed.T=}")
 
-    opt = arg_parsed.opt
-    verilog_file = arg_parsed.verilog_file
-    template_file = arg_parsed.T
-
-    # print(f"{opt=}")
-    # print(f"{verilog_file=}")
-    # print(f"{template_file=}")
-
-    main(opt, verilog_file, template_file)
+    main(arg_parsed.opt, arg_parsed.verilog_file, arg_parsed.T)

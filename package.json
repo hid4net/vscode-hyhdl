@@ -2,7 +2,7 @@
     "name": "hyhdl",
     "displayName": "hyhdl",
     "description": "instantiation/testbench/documentation for verilog",
-    "version": "0.1.9",
+    "version": "0.1.12",
     "publisher": "hid4net",
     "license": "MIT",
     "engines": {

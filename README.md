@@ -1,5 +1,5 @@
 # 1. About this Extension
-Generate the code of instantiation and testbench, the documentation of the module
+Generate the code of instantiation or testbench, the documentation of the module
 
 ## 1.1. Features
 - Instantiation and Testbench generation
