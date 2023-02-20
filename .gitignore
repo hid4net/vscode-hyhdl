@@ -6,4 +6,5 @@ src/*/_temp_debug/
 src/pyTools/build/
 src/pyTools/dist/
 src/pyTools/*.spec
+src/pyTools/*.exe
 /todo.md

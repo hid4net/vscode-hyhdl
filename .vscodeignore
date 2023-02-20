@@ -14,3 +14,4 @@ src/pyTools/*.spec
 **/_temp_debug/
 **/__pycache__/
 **/*.bat
+todo.md
